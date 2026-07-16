@@ -1,0 +1,475 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --panel-bg: rgba(30, 41, 59, 0.7);
+    --text-color: #f8fafc;
+    --input-bg: #1e293b;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --sidebar-width: 320px;
+    --modal-bg: #1e293b; /* تم توحيدها للضغط المطول */
+}
+.light-mode {
+    --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    --panel-bg: rgba(255, 255, 255, 0.85);
+    --text-color: #0f172a;
+    --input-bg: #ffffff;
+    --border-color: rgba(0, 0, 0, 0.1);
+    --modal-bg: #ffffff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+body { background: var(--bg-gradient); color: var(--text-color); height: 100vh; overflow: hidden; transition: background 0.3s; }
+
+/* الحاوية الرئيسية للتطبيق */
+.app-container { display: flex; width: 100vw; height: 100vh; position: relative; }
+
+/* القائمة الجانبية (الأشخاص) */
+.sidebar { width: var(--sidebar-width); background: rgba(15, 23, 42, 0.3); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; position: relative; z-index: 5; }
+.sidebar-header { padding: 15px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid var(--border-color); }
+
+.contacts-list { flex: 1; overflow-y: auto; padding: 10px; }
+.contact-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; background: rgba(255,255,255,0.02); }
+.contact-item:hover, .contact-item.active { background: rgba(99, 102, 241, 0.2); }
+.empty-msg { font-size: 13px; color: #64748b; text-align: center; margin-top: 40px; padding: 10px; }
+
+/* تنسيق العناوين داخل القائمة الجانبية لتستوعب التاج الملكي */
+.contact-item h4 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* شاشة المحادثة */
+.chat-area { flex: 1; display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.1); position: relative; }
+.chat-header { padding: 15px 20px; background: rgba(15, 23, 42, 0.2); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; }
+.active-user-info { display: flex; align-items: center; gap: 12px; }
+
+/* إعطاء فخامة لعنوان المحادثة النشطة بالتاج */
+#activeChatName {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 16px;
+}
+.status { font-size: 11px; color: #22c55e; display: block; }
+
+.chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.welcome-chat { margin: auto; text-align: center; color: #64748b; font-size: 15px; max-width: 80%; }
+
+/* فقاعات الرسائل */
+.message { max-width: 70%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; position: relative; }
+.message.sent { background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; align-self: flex-start; border-bottom-right-radius: 4px; }
+.message.received { background: #334155; color: white; align-self: flex-end; border-bottom-left-radius: 4px; }
+
+.chat-input-area { padding: 15px; display: flex; gap: 12px; border-top: 1px solid var(--border-color); background: rgba(15, 23, 42, 0.05); }
+.chat-input-area input { flex: 1; padding: 12px 18px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color); outline: none; font-size: 14px; }
+.send-btn { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none; width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+.send-btn:hover { transform: scale(1.05); }
+
+/* زر الـ (+) العائم */
+.fab-btn { position: absolute; left: 20px; bottom: 20px; width: 50px; height: 50px; background: #22c55e; border: none; border-radius: 50%; color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 12px rgba(34,197,94,0.3); z-index: 10; }
+
+/* القوائم المنبثقة */
+.menu-container { position: relative; }
+.menu-btn { background: transparent; border: none; color: var(--text-color); font-size: 24px; cursor: pointer; padding: 0 5px; }
+.dropdown-menu { position: absolute; right: 0; top: 35px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; width: 160px; z-index: 100; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+.dropdown-menu button { width: 100%; padding: 12px 15px; background: transparent; border: none; color: var(--text-color); text-align: right; cursor: pointer; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.dropdown-menu button:last-child { border: none; }
+.dropdown-menu button:hover { background: rgba(99,102,241,0.15); }
+
+.search-area { flex: 1; }
+.search-area input { width: 100%; padding: 8px 14px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-color); outline: none; font-size: 13px; }
+.avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; color: white; }
+
+/* تصميم النوافذ (Modals) */
+.modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+.modal-content { background: var(--input-bg); width: 100%; max-width: 380px; padding: 25px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 15px 30px rgba(0,0,0,0.4); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.save-btn { background: #22c55e; border: none; color: white; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.close-btn { background: #df4747 !important; margin-top: 15px; }
+
+.avatar-upload { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
+.avatar-preview { width: 75px; height: 75px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 26px; }
+
+.settings-list { display: flex; flex-direction: column; gap: 10px; }
+.settings-list button { width: 100%; padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); text-align: right; cursor: pointer; font-size: 14px; }
+.settings-list button:hover { background: rgba(99,102,241,0.1); }
+.danger-action { color: #ef4444 !important; font-weight: 600; }
+
+/* الحقول المتفاعلة */
+.input-group { position: relative; margin-bottom: 18px; }
+.input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); outline: none; font-size: 14px; }
+.input-group label { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none; transition: 0.2s; font-size: 13px; }
+.input-group input:focus ~ label, .input-group input:not(:placeholder-shown) ~ label { top: -10px; font-size: 11px; background: var(--input-bg); padding: 0 5px; color: #6366f1; }
+.date-label { top: -10px !important; font-size: 11px; background: var(--input-bg); padding: 0 5px; }
+
+.btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #4f46e5, #7c3aed); border: none; border-radius: 10px; color: white; cursor: pointer; font-weight: 600; font-size: 14px; }
+.secondary-btn { background: #475569; padding: 6px 12px; font-size: 12px; width: auto; border-radius: 6px; }
+.hidden { display: none !important; }
+
+/* دعم الهواتف المحمولة الذكي لشاشة واحدة في كل مرة */
+@media (max-width: 768px) {
+    .sidebar { width: 100vw; position: absolute; height: 100%; left: 0; top: 0; transition: transform 0.3s; }
+    .chat-area { width: 100vw; position: absolute; height: 100%; left: 0; top: 0; z-index: 4; }
+    .sidebar.hidden-mobile { transform: translateX(100%); }
+    .chat-area.hidden { display: none !important; }
+    .back-btn { background: transparent; border: none; color: var(--text-color); font-size: 15px; cursor: pointer; display: block !important; }
+}
+
+/* تنسيق قائمة الخيارات والإيموجي المتطورة عند الضغط المطول */
+.emoji-menu {
+    display: none;
+    position: absolute;
+    background: var(--modal-bg); 
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    min-width: 180px;
+    border: 1px solid var(--border-color);
+}
+
+.emojis-row span {
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.1s;
+}
+.emojis-row span:hover {
+    transform: scale(1.25);
+}
+
+/* شارات التفاعلات على الرسالة */
+.reactions-container {
+    display: flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+.reaction-badge {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+/* تنسيق أزرار التعديل والحذف النظيفة */
+.message-actions {
+    color: var(--text-color);
+}
+.message-actions span {
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-weight: 600;
+    font-size: 12px;
+}
+.message-actions span:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+/* ==========================================================================
+   شريط المراسيم الملكية (الحالات - Stories)
+   ========================================================================== */
+.stories-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none; /* إخفاء شريط التمرير في فايرفوكس */
+}
+
+/* إخفاء شريط التمرير في متصفحات كروم وسفاري */
+.stories-container::-webkit-scrollbar {
+    display: none;
+}
+
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    min-width: 65px;
+    text-align: center;
+}
+
+.story-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    /* خلفية متدرجة ذهبية تليق بالنمط الملكي */
+    background: linear-gradient(45deg, #d97706, #f59e0b, #fbbf24); 
+    padding: 2px; /* مسافة لظهور الإطار الدائري الذهبي */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease-in-out;
+}
+
+/* حركة بسيطة عند تمرير الماوس فوق الدائرة */
+.story-item:hover .story-avatar {
+    transform: scale(1.08);
+}
+
+.story-item span {
+    font-size: 11px;
+    color: #cbd5e1;
+    max-width: 65px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+/* دائرة إضافة مرسوم جديد (تنسيق مختلف ومميز) */
+.add-story .story-avatar {
+    background: rgba(255, 255, 255, 0.07);
+    border: 2px dashed #94a3b8;
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.add-story:hover .story-avatar {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+/* تنسيق الصورة التي سيتم اختيارها لعرضها داخل الدائرة */
+.story-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #1e1e2e;
+}
+/* ==========================================================================
+   تنسيق لوحة الشرف الملكية (Leaderboard)
+   ========================================================================== */
+.leaderboard-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+}
+
+.leaderboard-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.leaderboard-rank {
+    font-size: 18px;
+    font-weight: bold;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+/* تمييز المراكز الثلاثة الأولى بالبريق الملكي */
+.rank-1 {
+    background: linear-gradient(135deg, #fbbf24, #d97706); /* ذهبي */
+    color: #1e1e2e;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #e2e8f0, #94a3b8); /* فضي */
+    color: #1e1e2e;
+    box-shadow: 0 0 10px rgba(148, 163, 184, 0.4);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #b45309, #78350f); /* برونزي */
+    color: #fff;
+}
+
+.leaderboard-item span.user-points {
+    font-size: 12px;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+/* ==========================================================================
+   تنسيق صندوق النميمة والرسائل المجهولة
+   ========================================================================== */
+
+/* تخصيص مظهر حقل الكتابة للنميمة */
+#gossipText {
+    transition: all 0.3s ease;
+}
+
+#gossipText:focus {
+    outline: none;
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+/* تأثير البريق البنفسجي لزر الإرسال السري */
+#gossipModal .btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+#gossipModal .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, #a78bfa, #7c3aed) !important;
+}
+
+/* تمييز رسائل النميمة المجهولة داخل الشات (إذا كانت تحمل المعرف الخاص بها) */
+div[data-user-id="anonymous_gossip_user"] {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(109, 40, 217, 0.05)) !important;
+    border: 1px dashed rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* إضافة أيقونة خلفية خفيفة للنميمة مجهولة المصدر */
+div[data-user-id="anonymous_gossip_user"]::after {
+    content: "🤫";
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    font-size: 20px;
+    opacity: 0.15;
+    pointer-events: none;
+}
+/* ==========================================================================
+   إضافة: تنسيق بطاقات جريدة النميمة الملكية
+   ========================================================================== */
+
+/* حاوية الجريدة تتيح التمرير بسلاسة */
+#gossipNewspaper {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* تنسيق بطاقة النميمة الفردية لتظهر كرسالة غامضة */
+.gossip-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(26, 26, 38, 0.95));
+    border: 1px dashed rgba(139, 92, 246, 0.35);
+    border-radius: 12px;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.gossip-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.6);
+}
+
+/* إضافة إيموجي غامض كخلفية شفافة للبطاقة */
+.gossip-card::after {
+    content: "🤫";
+    position: absolute;
+    bottom: 5px;
+    left: 10px;
+    font-size: 26px;
+    opacity: 0.12;
+    pointer-events: none;
+}
+
+/* رأس البطاقة ويحتوي على الاسم والوقت */
+.gossip-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: #a78bfa;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 6px;
+}
+
+/* نص النميمة والاعتراف */
+.gossip-card-body {
+    font-size: 13.5px;
+    color: #f1f5f9;
+    line-height: 1.6;
+    text-align: right;
+    word-break: break-word;
+    font-weight: 500;
+}
+
+/* توقيت النميمة */
+.gossip-card-time {
+    font-size: 10px;
+    color: #64748b;
+}
+
+/* تنسيق زر الجرس */
+.notification-bell-btn {
+    position: relative;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.notification-bell-btn:hover {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: #8b5cf6;
+}
+
+/* تنسيق العداد الأحمر */
+.notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid #1a1a26;
+}

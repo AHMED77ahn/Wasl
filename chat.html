@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الدردشات الاحترافي</title>
+    <link rel="stylesheet" href="chat-style.css">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <div class="app-container">
+        
+        <!-- الجزء الأيمن: قائمة الأشخاص والبحث -->
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <div class="menu-container">
+                    <button class="menu-btn" onclick="toggleMenu(event)">⋮</button>
+<button class="notification-bell-btn" onclick="openNotificationsModal()">🔔<span id="notifBadge" class="notif-badge" style="display: none;">0</span></button>
+
+                 
+                    <div class="dropdown-menu hidden" id="dropdownMenu">
+                        <button onclick="openModal('profileModal')">👤 ملفي الشخصي</button>
+                      <button onclick="openModal('leaderboardModal')">🏆 لوحة الشرف</button>
+                      <button onclick="openModal('gossipModal')">🤫 صندوق النميمة</button>
+<button onclick="openModal('newspaperModal')">📰 جريدة النميمة</button>
+
+
+                        <button onclick="openModal('settingsModal')">⚙️ الإعدادات</button>
+                      
+
+
+                    </div>
+                </div>
+                <div class="search-area">
+                    <input type="text" id="searchContacts" placeholder="🔍 بحث عن أشخاص...">
+                </div>
+            </header>
+
+            <!-- قائمة الأشخاص المضافين -->
+          <!-- شريط المراسيم الملكية (الحالات) المحدث -->
+<div class="stories-container" id="storiesContainer">
+    <!-- الدائرة الأولى الثابتة لإضافة حالة خاصة بالمستخدم الحالي -->
+    <div class="story-item add-story" onclick="openModal('addStoryModal')">
+        <div class="story-avatar">➕</div>
+        <span>مرسومك</span>
+    </div>
+    <!-- هنا ستظهر حالات بقية أعضاء المملكة تلقائياً -->
+    <div id="activeStoriesList" style="display: flex; gap: 10px;"></div>
+</div>
+
+            <div class="contacts-list" id="contactsList">
+                <p class="empty-msg">لا يوجد أشخاص مضافين حالياً. اضغط على (+) في الأسفل لإضافة صديق.</p>
+            </div>
+
+            <!-- زر الـ (+) في أسفل يسار القائمة الجانبية -->
+            <button class="fab-btn" onclick="openModal('addPersonModal')">+</button>
+        </aside>
+
+        <!-- الجزء الأيسر: شاشة المحادثة المحددة -->
+        <main class="chat-area" id="chatArea">
+            <header class="chat-header">
+                <button class="back-btn hidden" id="backBtn" onclick="backToSidebar()">➡️ رجوع</button>
+                
+                <div class="active-user-info" onclick="openTargetProfile()" style="cursor: pointer;">
+                    <div class="avatar" id="activeChatAvatar">💬</div>
+                    <div>
+                        <h3 id="activeChatName">اختر شخصاً لبدء المحادثة</h3>
+                        <span class="status" id="activeChatStatus"></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- منطقة الرسائل -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-chat">👋 يرجى اختيار صديق من القائمة لبدء مراسلته بشكل خاص وآمن.</div>
+            </div>
+<!-- صندوق الرد -->
+<div id="replyContainer" style="display: none; padding: 10px; background: #f1f1f1; border-left: 4px solid #34b7f1; margin-bottom: 5px;">
+    <small style="color: #34b7f1; font-weight: bold;">رد على:</small>
+    <div id="replyText" style="font-size: 14px; color: #555;"></div>
+    <span onclick="cancelReply()" style="cursor: pointer; float: right; color: #888;">✖</span>
+</div>
+
+            <!-- شريط الإدخال السفلي -->
+            <form class="chat-input-area hidden" id="chatForm" onsubmit="event.preventDefault();">
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <button type="button" onclick="document.getElementById('imageInput').click()" style="background: none; border: none; cursor: pointer; font-size: 20px;">📷</button>
+
+                <button type="submit" class="send-btn" onclick="event.preventDefault(); window.sendPrivateMessage();">
+
+
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <!-- النافذة 1: ملفي الشخصي -->
+    <div class="modal hidden" id="profileModal" onclick="closeModalOnOutsideClick(event, 'profileModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👤 ملفي الشخصي</h2>
+                <button class="save-btn" onclick="saveProfile()">💾 حفظ</button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="avatarPreview">💬</div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewImage(event)">
+                    <button class="btn secondary-btn" onclick="document.getElementById('avatarInput').click()">تغيير الصورة</button>
+                </div>
+                <div class="input-group"><input type="text" id="profileFullName" placeholder=" "><label>الاسم الكامل</label></div>
+                <div class="input-group"><input type="text" id="profileUsername" placeholder=" "><label>اسم المستخدم</label></div>
+                <div class="input-group"><input type="date" id="profileBirthdate" placeholder=" "><label class="date-label">تحديد المواليد</label></div>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('profileModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 2: الإعدادات -->
+    <div class="modal hidden" id="settingsModal" onclick="closeModalOnOutsideClick(event, 'settingsModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>⚙️ الإعدادات</h2></div>
+            <div class="modal-body settings-list">
+                <button onclick="toggleTheme()">🌓 تغيير نمط التطبيق (ليلي / نهاري)</button>
+                <button onclick="loadBlockedUsers()">🚫 عرض قائمة المحظورين</button>
+                <div id="blockedUsersContainer" class="" style="margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; text-align: right; max-height: 150px; overflow-y: auto;">
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">الأشخاص المحظورون:</p>
+                    <div id="blockedListArea"></div>
+                </div>
+              
+                <button onclick="window.location.href='index.html'">➕ إضافة حساب جديد آخر</button>
+                <button class="danger-action" onclick="window.location.href='index.html'">🚪 تسجيل الخروج</button>
+                <button class="danger-action" onclick="deleteAccountPermanently()">⚠️ حذف الحساب نهائياً</button>
+              <!-- زر يفتح صفحة حول التطبيق -->
+<button onclick="window.location.href='about.html'">حول التطبيق</button>
+<button onclick="window.location.href='ranks.html'" style="margin-top: 10px;">نظام الرتب الملكية</button>
+<button onclick="window.location.href='privacy.html'" style="margin-top: 10px;">الخصوصية وأمان البيانات</button>
+
+
+              <div id="visitsSection" style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">
+    <p style="font-weight: bold; font-size: 14px;">سجل الزوار:</p>
+    <ul id="visitsList" style="list-style: none; padding: 0; font-size: 12px; color: #555;">
+        <!-- سيتم تحميل الزوار هنا -->
+    </ul>
+</div>
+<script>
+    // هذا الكود سيقوم بتشغيل دالة جلب الزوار تلقائياً بمجرد فتح الصفحة
+    setTimeout(loadVisitHistory, 1000); 
+</script>
+
+
+            </div>
+            <button class="btn close-btn" onclick="closeModal('settingsModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 3: إضافة شخص -->
+    <div class="modal hidden" id="addPersonModal" onclick="closeModalOnOutsideClick(event, 'addPersonModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>➕ إضافة شخص جديد</h2></div>
+            <div class="modal-body">
+                <div class="input-group"><input type="text" id="addSearchInput" required placeholder=" "><label>اسم المستخدم أو رقم الهاتف</label></div>
+                <button class="btn" onclick="addNewContact()">إضافة</button>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('addPersonModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 4: ملف الطرف الآخر -->
+    <div class="modal hidden" id="targetProfileModal" onclick="closeModalOnOutsideClick(event, 'targetProfileModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>👤 الملف الشخصي للصديق</h2></div>
+            <div class="modal-body" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div class="avatar-preview" id="targetAvatar" style="width: 90px; height: 90px; font-size: 36px; margin-bottom: 10px;">💬</div>
+                <div>
+                    <h3 id="targetFullName" style="margin-bottom: 5px;">الاسم الكامل</h3>
+                    <p id="targetUsername" style="color: #64748b; font-size: 14px;">@username</p>
+                </div>
+                <hr style="width: 100%; border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                <button class="btn" id="blockBtn" onclick="handleBlockAction()" style="background: #ef4444; margin-bottom: 5px;">🚫 حظر المستخدم</button>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('targetProfileModal')">إغلاق</button>
+        </div>
+    </div>
+    <!-- النافذة 5: إضافة مرسوم ملكي جديد (الحالات) -->
+    <div class="modal hidden" id="addStoryModal" onclick="closeModalOnOutsideClick(event, 'addStoryModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 مرسوم ملكي جديد</h2>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="storyTextInput" required placeholder=" ">
+                    <label>اكتب نص المرسوم هنا...</label>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <input type="file" id="storyImageInput" accept="image/*" style="display: none;" onchange="previewStoryImage(event)">
+                    <button type="button" class="btn secondary-btn" onclick="document.getElementById('storyImageInput').click()">📸 إرفاق صورة ملكية</button>
+                    <div id="storyImagePreview" style="margin-top: 10px; max-height: 150px; overflow: hidden; border-radius: 8px; display: flex; justify-content: center;"></div>
+                </div>
+                <button type="button" class="btn" onclick="publishRoyalDecree()" style="margin-top: 15px; background: #22c55e;">📢 نشر المرسوم</button>
+            </div>
+            <button type="button" class="btn close-btn" onclick="closeModal('addStoryModal')">إغلاق</button>
+        </div>
+    </div>
+    <!-- النافذة 6: لوحة الشرف الملكية -->
+    <div class="modal hidden" id="leaderboardModal" onclick="closeModalOnOutsideClick(event, 'leaderboardModal')">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>🏆 لوحة الشرف للمملكة</h2>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-bottom: 15px;">
+                    فرسان المملكة الأكثر نشاطاً وولاءً في البلاط الملكي!
+                </p>
+                <!-- قائمة الأبطال الملكية -->
+                <div id="leaderboardList" class="leaderboard-list">
+                    <!-- سيتم جلب وعرض الأبطال هنا برمجياً -->
+                </div>
+            </div>
+            <button type="button" class="btn close-btn" onclick="closeModal('leaderboardModal')" style="margin-top: 15px;">إغلاق</button>
+        </div>
+    </div>
+    <!-- النافذة 7: صندوق النميمة المجهول -->
+    <div class="modal hidden" id="gossipModal" onclick="closeModalOnOutsideClick(event, 'gossipModal')">
+        <div class="modal-content" style="max-width: 400px; border: 1px solid rgba(139, 92, 246, 0.3);">
+            <div class="modal-header">
+                <h2>🤫 صندوق النميمة</h2>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; text-align: center;">
+                    اكتب ما تشاء بجرأة! هويتك ستظل مجهولة بالكامل ولن يعرفك أحد في المملكة.
+                </p>
+                <textarea id="gossipText" placeholder="اكتب سرك، اعترافك، أو نميمتك هنا..." style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #1a1a26; color: white; resize: none; font-family: inherit;"></textarea>
+                
+                <button type="button" class="btn" onclick="sendAnonymousGossip()" style="margin-top: 15px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; font-weight: bold; width: 100%;">🚀 إرسال سراً للجميع</button>
+            </div>
+            <button type="button" class="btn close-btn" onclick="closeModal('gossipModal')" style="margin-top: 10px;">إلغاء</button>
+        </div>
+    </div>
+<!-- النافذة 8: جريدة النميمة الملكية (للقراءة فقط) -->
+<div class="modal hidden" id="newspaperModal" onclick="closeModalOnOutsideClick(event, 'newspaperModal')">
+    <div class="modal-content" style="max-width: 450px; border: 1px solid rgba(251, 191, 36, 0.3); max-height: 80vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+            <h2>📰 جريدة النميمة الملكية</h2>
+        </div>
+        <div class="modal-body" style="overflow-y: auto; flex: 1;">
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; text-align: center;">
+                آخر الأخبار السرية، الاعترافات، والهمسات التي تدور في أروقة المملكة!
+            </p>
+            <div id="gossipNewspaper" style="display: flex; flex-direction: column; gap: 12px; min-height: 150px;">
+                <!-- سيتم جلب وعرض الاعترافات هنا برمجياً من الفايربيس -->
+            </div>
+        </div>
+        <button type="button" class="btn close-btn" onclick="closeModal('newspaperModal')" style="margin-top: 10px; flex-shrink: 0;">إغلاق الجريدة</button>
+    </div>
+</div>
+  
+<!-- نافذة الإشعارات -->
+<div id="notificationsModal" class="gossip-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+    <div class="gossip-modal-content" style="background: #1a1a26; margin: 15% auto; padding: 20px; border-radius: 10px; width: 80%; color: white;">
+        <div class="gossip-modal-header">
+            <h3>🔔 الإشعارات</h3>
+            <span class="gossip-close" onclick="document.getElementById('notificationsModal').style.display = 'none'" style="cursor:pointer; float:right;">&times;</span>
+        </div>
+        <div id="notificationsList" style="margin-top: 15px;">
+            <p>لا توجد إشعارات حالياً.</p>
+        </div>
+    </div>
+</div>
+
+  <!-- نافذة طلب تفعيل الإشعارات للمستخدمين الجدد -->
+<div id="notificationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background:#1e1e1e; color:#fff; padding:25px; border-radius:20px; text-align:center; max-width:85%; width:340px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <div style="font-size: 40px; margin-bottom: 15px;">🔔</div>
+        <h3 style="margin-bottom: 10px; font-family: sans-serif;">تفعيل التنبيهات</h3>
+        <p style="color:#ccc; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">لتصلك رسائل أصدقائك وتنبيهات الرتب والردود فوراً حتى عندما يكون التطبيق مغلقاً.</p>
+        <button onclick="requestNotificationPermission()" style="width:100%; padding:12px; background:#3b82f6; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin-bottom: 10px; transition: background 0.3s;">تفعيل الإشعارات</button>
+        <button onclick="closeNotificationModal()" style="width:100%; padding:10px; background:transparent; border:none; color:#94a3b8; cursor:pointer;">ليس الآن</button>
+    </div>
+</div>
+
+    <!-- مكتبات الفايربيس -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="chat.js"></script>
+
+  
+
+</body>
+</html>

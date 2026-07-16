@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الرتب الملكية - وصل</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #ffd700; /* الذهبي كألوان ملكية */
+            --silver-color: #c0c0c0;
+            --bronze-color: #cd7f32;
+            --blue-accent: #34b7f1;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        /* رأس الصفحة */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--blue-accent);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 0 8px;
+            margin-left: 12px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* مقدمة بسيطة */
+        .intro-text {
+            font-size: 0.9rem;
+            color: #b3b3b3;
+            margin-bottom: 20px;
+            text-align: center;
+            background-color: #1a1a1a;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+        }
+
+        /* كروت الرتب */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .card:active {
+            transform: scale(0.99);
+        }
+
+        /* تخصيص حدود الكروت حسب هيبة الرتبة */
+        .card.king { border-right: 4px solid var(--primary-color); }
+        .card.prince { border-right: 4px solid var(--silver-color); }
+        .card.duke { border-right: 4px solid var(--blue-accent); }
+        .card.baron { border-right: 4px solid var(--bronze-color); }
+        .card.knight { border-right: 4px solid #4caf50; }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .king h2 { color: var(--primary-color); }
+        .prince h2 { color: var(--silver-color); }
+        .duke h2 { color: var(--blue-accent); }
+        .baron h2 { color: var(--bronze-color); }
+        .knight h2 { color: #4caf50; }
+
+        .card p {
+            font-size: 0.92rem;
+            margin: 0 0 10px 0;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .card ul {
+            padding-right: 20px;
+            margin: 0;
+            font-size: 0.88rem;
+            color: #b3b3b3;
+        }
+
+        .card li {
+            margin-bottom: 6px;
+        }
+
+        /* تذييل الصفحة */
+        .footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- رأس الصفحة مع زر الرجوع لصفحة المحادثة -->
+        <div class="header">
+            <a href="chat.html" class="back-btn">&#10140;</a>
+            <h1>نظام الرتب الملكية</h1>
+        </div>
+
+        <div class="intro-text">
+            مرحباً بكِ في نظام الرتب الملكي الخاص بتطبيق "وصل"! تم تصميم هذا النظام لتمييز الأعضاء المتفاعلين ومنحهم صلاحيات وميزات استثنائية تعزز تجربتهم داخل التطبيق.
+        </div>
+
+        <!-- 1. رتبة الملك -->
+        <div class="card king">
+            <h2>👑 رتبة الملك / الملكة</h2>
+            <p>الرتبة السيادية العليا في التطبيق (الإدارة العامة)</p>
+            <ul>
+                <li><strong>شارة التاج الذهبي:</strong> تظهر بجانب الاسم في جميع المحادثات.</li>
+                <li><strong>التحكم المطلق:</strong> صلاحيات كاملة لإدارة الأعضاء، حظر المزعجين، وتعيين المشرفين.</li>
+                <li><strong>الرسائل المثبتة:</strong> القدرة على تثبيت أي رسالة هامة أعلى شاشة المحادثة.</li>
+                <li><strong>الحصانة الملكية:</strong> حماية كاملة ضد الحظر أو الكتم من أي رتبة أخرى.</li>
+                <li><strong>التميز البصري:</strong> خط مخصص وخلفية محادثة فريدة تميز رسائل الإدارة.</li>
+            </ul>
+        </div>
+
+        <!-- 2. رتبة الأمير -->
+        <div class="card prince">
+            <h2>✨ رتبة الأمير / الأميرة</h2>
+            <p>النخبة ومساعدو الإدارة المباشرين (المشرف العام)</p>
+            <ul>
+                <li><strong>شارة التاج الفضي:</strong> تميز حساباتهم كشخصيات رفيعة المستوى.</li>
+                <li><strong>إدارة المحادثات:</strong> صلاحيات كتم الأعضاء المخالفين أو طردهم مؤقتاً لحفظ النظام.</li>
+                <li><strong>تخصيص الغرف:</strong> صلاحية تعديل العناوين، ألوان الغرف، وكتابة القوانين العامة.</li>
+                <li><strong>الأولوية البرمجية:</strong> إمكانية تجربة الميزات البرمجية الجديدة قبل إطلاقها للعامة.</li>
+            </ul>
+        </div>
+
+        <!-- 3. رتبة الدوق -->
+        <div class="card duke">
+            <h2>🎖️ رتبة الدوق / الدوقة</h2>
+            <p>رتبة النبالة المخصصة للأعضاء الموثوقين والنشيطين جداً</p>
+            <ul>
+                <li><strong>شارة النبالة:</strong> تظهر بوضوح بجانب الاسم كرمز للولاء والتفاعل.</li>
+                <li><strong>تفاعلات حصرية (Reactions):</strong> إمكانية استخدام إيموجيات تفاعلية فريدة ونادرة لا تتوفر للبقية.</li>
+                <li><strong>تلوين الاسم:</strong> إمكانية اختيار لون مخصص للاسم في قائمة المتصلين لزيادة الهيبة البصرية.</li>
+            </ul>
+        </div>
+
+        <!-- 4. رتبة البارون -->
+        <div class="card baron">
+            <h2>🛡️ رتبة البارون / البارونة</h2>
+            <p>رتبة كبار الشخصيات (VIP) الممنوحة لداعمي التطبيق والمستمرين فيه</p>
+            <ul>
+                <li><strong>شارة الدرع البرونزي:</strong> تزيّن الملف الشخصي وتوضح مكانة العضو.</li>
+                <li><strong>تخصيص الخلفيات:</strong> إمكانية اختيار ثيمات وخلفيات دردشة حصرية وتطبيقها فوراً.</li>
+                <li><strong>رفع الملفات بلا قيود:</strong> أولوية في إرسال الصور والمستندات بحجم أكبر وبسرعة أعلى.</li>
+            </ul>
+        </div>
+
+        <!-- 5. رتبة الفارس -->
+        <div class="card knight">
+            <h2>⚔️ رتبة الفارس / الفارسة</h2>
+            <p>حماة المجتمع والمستخدمون المتفاعلون بشكل يومي</p>
+            <ul>
+                <li><strong>شارة السيفين متقاطعين:</strong> رمز النشاط الدائم والمساهمة في استقرار الحوار.</li>
+                <li><strong>التبليغ السريع (Flagging):</strong> أولوية معالجة البلاغات المرسلة من قبلهم لمشرفي التطبيق.</li>
+                <li><strong>دخول الغرف المغلقة:</strong> صلاحية حصرية لدخول غرف النقاش المخصصة للأعضاء المميزين فقط.</li>
+            </ul>
+        </div>
+
+      <!-- 6. رتبة خادم البلاط -->
+<div class="card servant">
+    <h2>🧹 رتبة خادم البلاط (الأعضاء الجدد)</h2>
+    <p>الرتبة الترحيبية والأساسية لكل من يطأ قدمه البلاط الملكي لتطبيق "وصل" لأول مرة</p>
+    <ul>
+        <li><strong>شارة المكنسة أو الريشة:</strong> شارة بسيطة تظهر بجانب الاسم توضح أنه عضو جديد يكتشف المكان.</li>
+        <li><strong>الصلاحيات الأساسية:</strong> القدرة على قراءة الرسائل والمشاركة بالكتابة في غرف الدردشة العامة فقط.</li>
+        <li><strong>حدود الحساب:</strong> لا يمكنه استخدام التفاعلات الحصرية (Reactions) أو تغيير خلفيات الدردشة في هذه المرحلة.</li>
+        <li><strong>طريق الترقية السريع:</strong> بمجرد إرسال أول 50 رسالة والتفاعل مع الأعضاء، يترقى تلقائياً ويحصل على سيف "الفارس"!</li>
+    </ul>
+</div>
+
+
+
+        <div class="footer">
+            تطبيق وصل &copy; 2026 - جميع الحقوق محفوظة
+        </div>
+    </div>
+
+</body>
+</html>

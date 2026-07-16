@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الخصوصية وأمان البيانات - وصل</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #34b7f1;
+            --accent-color: #075e54;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+
+        /* رأس الصفحة وزر العودة */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 10px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin: 0;
+            color: #fff;
+        }
+
+        /* كروت المعلومات */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-right: 4px solid var(--primary-color);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card p, .card ul {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            color: #b0b0b0;
+        }
+
+        .card ul {
+            padding-right: 20px;
+            margin-top: 10px;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- الرأس مع زر العودة للدردشة -->
+        <div class="header">
+            <a href="chat.html" class="back-btn">&#10140;</a>
+            <h1>الخصوصية وأمان البيانات</h1>
+        </div>
+
+        <!-- كرت التشفير والحماية -->
+        <div class="card">
+            <h2>🔒 تشفير وحماية البيانات</h2>
+            <p>يتم نقل وحفظ جميع الرسائل والبيانات باستخدام بروتوكولات حماية متطورة عبر السحابة الآمنة، لضمان عدم وصول أي طرف ثالث غير مصرح له إليها.</p>
+        </div>
+
+        <!-- كرت خصوصية المحادثات -->
+        <div class="card">
+            <h2>👥 خصوصية المحادثات الثنائية</h2>
+            <p>المحادثات الخاصة مشفرة ومحمية بالكامل؛ حيث تقتصر رؤيتها وقراءتها على طرفي المحادثة فقط (المرسل والمستقبل) عبر معرفات رقمية فريدة ومؤمنة.</p>
+        </div>
+
+        <!-- كرت التحكم بالبيانات -->
+        <div class="card">
+            <h2>⚙️ التحكم الكامل بالبيانات</h2>
+            <p>نؤمن بحقكِ الكامل في التحكم ببياناتكِ؛ لذا يتيح التطبيق ميزات:</p>
+            <ul>
+                <li>الحذف الفوري والمتبادل للرسائل من الطرفين.</li>
+                <li>إمكانية مسح سجل المحادثات بالكامل في أي وقت.</li>
+                <li>حذف الحساب نهائياً مع كافة البيانات المتعلقة به فوراً عند الطلب.</li>
+            </ul>
+        </div>
+
+        <!-- كرت منع التتبع -->
+        <div class="card">
+            <h2>🚫 بيئة خالية من التتبع</h2>
+            <p>نحن لا نقوم بجمع، بيع، أو مشاركة أي بيانات شخصية أو سجلات محادثات مع أي جهات إعلانية أو خارجية على الإطلاق. محادثاتكِ ملك لكِ وحدكِ.</p>
+        </div>
+    </div>
+
+</body>
+</html>
