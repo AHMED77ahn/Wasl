@@ -1,6 +1,6 @@
 // تكوين Firebase المبدئي لمنع انهيار الصفحة
 const firebaseConfig = {
-  apiKey: "AIzaSyBM_LkZr59WM4fnTvW0CKbcj-y2V8Flqto",
+  apiKey: "AIzaSyBM_LkZr59WM4fnTvW0KBcj-y2V8Flqto",
   authDomain: "wasl-4f5cb.firebaseapp.com",
   projectId: "wasl-4f5cb",
   storageBucket: "wasl-4f5cb.firebasestorage.app",
@@ -8,6 +8,7 @@ const firebaseConfig = {
   appId: "1:754785038144:web:ca48f718b71148ae3394a5",
   measurementId: "G-8TMN0ER8Z3"
 };
+
 
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
