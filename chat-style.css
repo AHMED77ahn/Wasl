@@ -1,0 +1,986 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    --panel-bg: rgba(30, 41, 59, 0.7);
+    --text-color: #f8fafc;
+    --input-bg: #1e293b;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --sidebar-width: 340px;
+    --modal-bg: #1e293b;
+    --bg-color: #0f172a;
+    --accent-color: #8b5cf6;
+}
+
+.light-mode {
+    --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    --panel-bg: rgba(255, 255, 255, 0.85);
+    --text-color: #0f172a;
+    --input-bg: #ffffff;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --modal-bg: #ffffff;
+}
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Cairo', sans-serif; 
+}
+
+html, body {
+    height: 100%;
+    height: -webkit-fill-available;
+    overflow: hidden;
+}
+
+body { 
+    background: var(--bg-gradient); 
+    color: var(--text-color); 
+    transition: background 0.3s; 
+}
+
+/* الحاوية الرئيسية للتطبيق */
+.app-container { 
+    display: flex; 
+    width: 100vw; 
+    height: 100vh; 
+    height: 100dvh;
+    position: relative; 
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* القائمة الجانبية (الأشخاص) */
+.sidebar { 
+    width: var(--sidebar-width); 
+    background: rgba(15, 23, 42, 0.4); 
+    border-left: 1px solid var(--border-color); 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+    z-index: 5; 
+    backdrop-filter: blur(10px);
+}
+
+.sidebar-header { 
+    padding: 12px 15px; 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    border-bottom: 1px solid var(--border-color); 
+}
+
+/* إشعارات الجرس الملكي */
+.notification-container {
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+.notification-container:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+#notificationBell {
+    font-size: 18px;
+}
+#notificationBadge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #ef4444;
+    color: white;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 50%;
+    font-weight: bold;
+    min-width: 14px;
+    text-align: center;
+}
+
+/* قسم المراسيم الملكية (الحالات) العلوي */
+.royal-stories-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+.royal-stories-container::-webkit-scrollbar {
+    display: none;
+}
+.story-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 11px;
+    cursor: pointer;
+    min-width: 60px;
+    text-align: center;
+}
+.story-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #d4af37;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-bottom: 4px;
+    transition: transform 0.2s;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+}
+.story-avatar:hover {
+    transform: scale(1.05);
+}
+.add-story-btn .story-avatar {
+    border: 2px dashed #64748b;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.04);
+}
+.story-name {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #cbd5e1;
+    font-size: 11px;
+}
+
+.contacts-list { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 10px; 
+}
+
+.contact-item { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 10px 12px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    transition: background 0.2s; 
+    margin-bottom: 6px; 
+    background: rgba(255, 255, 255, 0.02); 
+}
+.contact-item:hover, .contact-item.active { 
+    background: rgba(99, 102, 241, 0.15); 
+}
+.empty-msg { 
+    font-size: 13px; 
+    color: #64748b; 
+    text-align: center; 
+    margin-top: 40px; 
+    padding: 10px; 
+}
+
+.contact-item h4 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* شاشة المحادثة */
+.chat-area { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    background: rgba(15, 23, 42, 0.2); 
+    position: relative; 
+}
+
+.chat-header { 
+    padding: 12px 20px; 
+    background: rgba(15, 23, 42, 0.3); 
+    border-bottom: 1px solid var(--border-color); 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+}
+
+.active-user-info { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    cursor: pointer; 
+}
+
+#activeChatName {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+}
+
+.status { 
+    font-size: 11px; 
+    color: #22c55e; 
+    display: block; 
+}
+
+.chat-messages { 
+    flex: 1; 
+    padding: 20px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+}
+
+.welcome-chat { 
+    margin: auto; 
+    text-align: center; 
+    color: #64748b; 
+    font-size: 14px; 
+    max-width: 80%; 
+}
+
+/* فقاعات الرسائل */
+.message { 
+    max-width: 70%; 
+    padding: 10px 14px; 
+    border-radius: 14px; 
+    font-size: 14px; 
+    line-height: 1.5; 
+    word-break: break-word; 
+    position: relative; 
+}
+.message.sent { 
+    background: linear-gradient(135deg, #4f46e5, #6366f1); 
+    color: white; 
+    align-self: flex-start; 
+    border-bottom-right-radius: 4px; 
+}
+.message.received { 
+    background: #334155; 
+    color: white; 
+    align-self: flex-end; 
+    border-bottom-left-radius: 4px; 
+}
+.message img { 
+    max-width: 100%; 
+    border-radius: 8px; 
+    margin-top: 5px; 
+}
+
+.chat-input-area { 
+    padding: 12px 15px; 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    border-top: 1px solid var(--border-color); 
+    background: rgba(15, 23, 42, 0.3); 
+}
+
+.chat-input-area input { 
+    flex: 1; 
+    padding: 10px 16px; 
+    background: var(--input-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 12px; 
+    color: var(--text-color); 
+    outline: none; 
+    font-size: 14px; 
+}
+
+.media-btn {
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    font-size: 20px; 
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.send-btn { 
+    background: linear-gradient(135deg, #4f46e5, #7c3aed); 
+    color: white; 
+    border: none; 
+    width: 42px; 
+    height: 42px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    transition: transform 0.2s; 
+}
+.send-btn:hover { 
+    transform: scale(1.05); 
+}
+
+/* الأزرار العامة وعناصر التفاعل */
+button, .fab-btn, .send-btn {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* زر الـ (+) العائم */
+.fab-btn { 
+    position: absolute; 
+    left: 20px; 
+    bottom: 20px; 
+    width: 50px; 
+    height: 50px; 
+    background: linear-gradient(135deg, #22c55e, #16a34a); 
+    border: none; 
+    border-radius: 50%; 
+    color: white; 
+    font-size: 24px; 
+    cursor: pointer; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); 
+    z-index: 10; 
+    transition: transform 0.2s ease; 
+}
+.fab-btn:active { 
+    transform: scale(0.9); 
+}
+
+/* القوائم المنبثقة والبحث */
+.menu-container { 
+    position: relative; 
+}
+.menu-btn { 
+    background: transparent; 
+    border: none; 
+    color: var(--text-color); 
+    font-size: 22px; 
+    cursor: pointer; 
+    padding: 0 5px; 
+}
+.dropdown-menu { 
+    position: absolute; 
+    right: 0; 
+    top: 40px; 
+    background: var(--modal-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 14px; 
+    width: 170px; 
+    z-index: 100; 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); 
+    overflow: hidden;
+}
+.dropdown-menu button { 
+    width: 100%; 
+    padding: 12px 15px; 
+    background: transparent; 
+    border: none; 
+    color: var(--text-color); 
+    text-align: right; 
+    cursor: pointer; 
+    font-size: 13px; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+}
+.dropdown-menu button:last-child { 
+    border: none; 
+}
+.dropdown-menu button:hover { 
+    background: rgba(99, 102, 241, 0.15); 
+}
+
+.search-area { 
+    flex: 1; 
+}
+.search-area input { 
+    width: 100%; 
+    padding: 8px 14px; 
+    background: var(--input-bg); 
+    border: 1px solid var(--border-color); 
+    border-radius: 20px; 
+    color: var(--text-color); 
+    outline: none; 
+    font-size: 13px; 
+}
+
+.avatar { 
+    width: 40px; 
+    height: 40px; 
+    background: linear-gradient(135deg, #6366f1, #a855f7); 
+    border-radius: 50%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 16px; 
+    color: white; 
+    overflow: hidden; 
+    flex-shrink: 0;
+}
+.avatar img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+
+/* تصميم النوافذ (Modals) */
+.modal { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh; 
+    background: rgba(0, 0, 0, 0.65); 
+    backdrop-filter: blur(5px); 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 1000; 
+    padding: 15px; 
+}
+.modal-content { 
+    background: var(--modal-bg); 
+    width: 100%; 
+    max-width: 380px; 
+    padding: 22px; 
+    border-radius: 20px; 
+    border: 1px solid var(--border-color); 
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); 
+    max-height: 90vh; 
+    overflow-y: auto; 
+}
+.modal-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 18px; 
+}
+.save-btn { 
+    background: #22c55e; 
+    border: none; 
+    color: white; 
+    padding: 6px 14px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    font-size: 13px;
+}
+.close-btn { 
+    background: #ef4444 !important; 
+    margin-top: 15px; 
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.avatar-upload { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+.avatar-preview { 
+    width: 75px; 
+    height: 75px; 
+    background: linear-gradient(135deg, #6366f1, #a855f7); 
+    border-radius: 50%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    font-size: 26px; 
+    overflow: hidden; 
+}
+.avatar-preview img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; 
+}
+
+.settings-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+.settings-list button { 
+    width: 100%; 
+    padding: 12px; 
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid var(--border-color); 
+    border-radius: 10px; 
+    color: var(--text-color); 
+    text-align: right; 
+    cursor: pointer; 
+    font-size: 14px; 
+}
+.settings-list button:hover { 
+    background: rgba(99, 102, 241, 0.1); 
+}
+.danger-action { 
+    color: #ef4444 !important; 
+    font-weight: 600; 
+}
+
+.input-group { 
+    position: relative; 
+    margin-bottom: 18px; 
+}
+.input-group input { 
+    width: 100%; 
+    padding: 12px; 
+    background: rgba(0, 0, 0, 0.15); 
+    border: 1px solid var(--border-color); 
+    border-radius: 10px; 
+    color: var(--text-color); 
+    outline: none; 
+    font-size: 14px; 
+}
+.input-group label { 
+    position: absolute; 
+    right: 12px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #64748b; 
+    pointer-events: none; 
+    transition: 0.2s; 
+    font-size: 13px; 
+}
+.input-group input:focus ~ label, .input-group input:not(:placeholder-shown) ~ label { 
+    top: -10px; 
+    font-size: 11px; 
+    background: var(--input-bg); 
+    padding: 0 5px; 
+    color: #6366f1; 
+}
+.date-label { 
+    top: -10px !important; 
+    font-size: 11px; 
+    background: var(--input-bg); 
+    padding: 0 5px; 
+}
+
+.btn { 
+    width: 100%; 
+    padding: 12px; 
+    background: linear-gradient(135deg, #4f46e5, #7c3aed); 
+    border: none; 
+    border-radius: 10px; 
+    color: white; 
+    cursor: pointer; 
+    font-weight: 600; 
+    font-size: 14px; 
+}
+.secondary-btn { 
+    background: #475569; 
+    padding: 6px 12px; 
+    font-size: 12px; 
+    width: auto; 
+    border-radius: 6px; 
+}
+.hidden { 
+    display: none !important; 
+}
+
+/* التكيف مع الهواتف المحمولة */
+@media (max-width: 768px) {
+    .sidebar { 
+        width: 100vw; 
+        position: absolute; 
+        height: 100%; 
+        left: 0; 
+        top: 0; 
+        transition: transform 0.3s ease; 
+    }
+    .chat-area { 
+        width: 100vw; 
+        position: absolute; 
+        height: 100%; 
+        left: 0; 
+        top: 0; 
+        z-index: 4; 
+    }
+    .sidebar.hidden-mobile { 
+        transform: translateX(100%); 
+    }
+    .chat-area.hidden { 
+        display: none !important; 
+    }
+    .back-btn { 
+        background: transparent; 
+        border: none; 
+        color: var(--text-color); 
+        font-size: 14px; 
+        cursor: pointer; 
+        display: block !important; 
+        padding: 5px 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+    }
+}
+
+/* الرتب والشارات الملكية */
+.developer-badge {
+    background-color: #ec4899;
+    color: white;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-right: 5px;
+    font-weight: bold;
+    box-shadow: 0 0 10px #ec4899;
+    display: inline-block;
+}
+
+.king-badge {
+    color: #ffd700;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ffd700;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+
+
+
+
+
+
+
+/* إصلاح تموضع القوائم المنسدلة عند تغيير الاتجاه */
+html[dir="ltr"] .dropdown-menu,
+html[dir="ltr"] .menu-content,
+html[dir="ltr"] .sidebar,
+html[dir="ltr"] [class*="dropdown"] {
+    left: 10px !important;
+    right: auto !important;
+}
+
+html[dir="rtl"] .dropdown-menu,
+html[dir="rtl"] .menu-content,
+html[dir="rtl"] .sidebar,
+html[dir="rtl"] [class*="dropdown"] {
+    right: 10px !important;
+    left: auto !important;
+}
+
+
+
+
+
+
+
+
+
+select, select.app-language-select {
+  width: 100% !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-family: inherit !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  text-align: right !important;
+  direction: rtl !important;
+  margin-bottom: 10px !important;
+  cursor: pointer !important;
+}
+
+
+
+
+
+
+/* تنسيق زر المتجر الملكي ليكون تماماً مثل باقي أزرار القائمة وبمنتصف النص */
+#royalStoreBtn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-color);
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+#royalStoreBtn:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+
+
+
+#royalStoreBtn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-color);
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Cairo', sans-serif;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+}
+
+#royalStoreBtn:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+
+
+
+
+
+/* تصميم زر حسابي ليطابق باقي أزرار وحقول القائمة تماماً */
+.account-btn-trigger, .menu-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+    width: 100%;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: background 0.2s ease;
+}
+
+.account-btn-trigger:hover, .menu-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
+
+
+
+
+
+
+/* منع ظهور قائمة النظام وتحديد النص عند الضغط المطول */
+body, .chat-card, .chat-item, div {
+    -webkit-touch-callout: none !important; /* ملغي لقائمة الهاتف */
+    -webkit-user-select: none !important;   /* منع تحديد النص */
+    user-select: none !important;
+}
+
+/* خلفية التغويش */
+.chat-preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 15, 28, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.chat-preview-overlay.active {
+    display: flex !important;
+}
+
+.preview-card-wrapper {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+.preview-actions {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.preview-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+}
+
+.preview-btn.pin { background: #1c2638; }
+.preview-btn.delete { background: #331822; color: #ff5252; }
+
+
+
+
+
+
+
+
+/* الغطاء الخلفي مع التغويش (Blur) */
+.chat-preview-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 15, 28, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chat-preview-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* حاوية عرض المحادثة المضغوط عليها لوحدها */
+.preview-card-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin-bottom: 20px;
+    transform: scale(0.92);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.chat-preview-overlay.active .preview-card-wrapper {
+    transform: scale(1);
+}
+
+/* أزرار الخيارات تحت المحادثة */
+.preview-actions {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.preview-btn.pin {
+    background: #1c2638;
+    border: 1px solid #2d3c59;
+}
+
+.preview-btn.delete {
+    background: #331822;
+    color: #ff5252;
+    border: 1px solid #542231;
+}
+
+.preview-btn:active {
+    transform: scale(0.97);
+}
+
+
+
+
+
+
+
+
+    .settings-btn {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    display: block;
+}
+
+.settings-btn:active {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(0.98);
+}
+
+
+
+/* تنسيق قوي ومباشر لعرض الصور داخل الدردشة */
+img.chat-auto-img {
+    width: 100% !important;
+    max-width: 170px !important;
+    height: auto !important;
+    max-height: 220px !important;
+    border-radius: 10px !important;
+    display: block !important;
+    margin: 4px 0 !important;
+    object-fit: cover !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+}
+
+
+
+
+

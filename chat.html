@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>سجل الدردشات الاحترافي</title>
+    <link rel="stylesheet" href="chat-style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <div class="app-container">
+        <div id="chatsPage" class="tab-page">
+
+        <!-- الجزء الأيمن: قائمة الأشخاص والبحث -->
+        <aside class="sidebar" id="sidebar">
+            <header class="sidebar-header">
+                <!-- 1. زر القائمة والخيارات -->
+                <div class="menu-container">
+                    <button class="menu-btn" onclick="toggleMenu(event)" aria-label="القائمة الرئيسية">⋮</button>
+                    <div class="dropdown-menu hidden" id="dropdownMenu">
+                        <button onclick="openModal('profileModal')">👤 ملفي الشخصي</button>
+                        <button onclick="openModal('leaderboardModal'); loadLeaderboard();">🏆 لوحة الشرف</button>
+                        <button onclick="openModal('gossipModal')">🤫 صندوق النميمة</button>
+                        <button onclick="openModal('newspaperModal'); loadNewspaper();">📰 جريدة النميمة</button>
+                        <button onclick="openModal('settingsModal')">⚙️ الإعدادات</button>
+                    </div>
+                </div>
+
+                <!-- 2. جرس الإشعارات -->
+                <div class="notification-container" onclick="toggleNotifications()" aria-label="الإشعارات">
+                    <span id="notificationBell">🔔</span>
+                    <span id="notificationBadge" class="hidden">0</span>
+                </div>
+
+                <!-- 3. حقل البحث -->
+                <div class="search-area">
+                    <input type="text" id="searchContacts" placeholder="🔍 بحث عن أشخاص...">
+                </div>
+            </header>
+
+            <!-- 📜 قسم المراسيم الملكية (الحالات) في الأعلى -->
+            <div class="royal-stories-container" id="royalStoriesContainer">
+                <div class="story-circle add-story-btn" onclick="openModal('addStoryModal')">
+                    <div class="story-avatar">➕</div>
+                    <span class="story-name">مرسومك</span>
+                </div>
+                
+                <div class="story-circle">
+                    <div class="story-avatar">👑</div>
+                    <span class="story-name">الملك</span>
+                </div>
+                <div class="story-circle">
+                    <div class="story-avatar">🛡️</div>
+                    <span class="story-name">الوزير</span>
+                </div>
+            </div>
+
+            <!-- قائمة الأشخاص المضافين -->
+            <div class="contacts-list" id="contactsList">
+                <p class="empty-msg">لا يوجد أشخاص مضافين حالياً. اضغط على (+) في الأسفل لإضافة صديق.</p>
+            </div>
+
+
+
+
+
+
+
+
+
+            <!-- زر الـ (+) لإضافة شخص -->
+            <button class="fab-btn" onclick="openModal('addPersonModal')" aria-label="إضافة صديق">+</button>
+        </aside>
+
+        <!-- الجزء الأيسر: شاشة المحادثة المحددة -->
+        <main class="chat-area" id="chatArea">
+            <header class="chat-header">
+                <button class="back-btn" hidden id="backBtn" onclick="backToSidebar(); document.getElementById('globalChatBtn').style.display = 'flex';">➡️ رجوع</button>
+
+                
+                <div class="active-user-info" onclick="openTargetProfile()">
+                    <div class="avatar" id="activeChatAvatar">💬</div>
+                    <div>
+                        <h3 id="activeChatName">اختر صديقاً لبدء المحادثة</h3>
+                        <span class="status" id="activeChatStatus"></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- منطقة الرسائل -->
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-chat">👋 يرجى اختيار صديق من القائمة لبدء مراسلته بشكل خاص وآمن.</div>
+            </div>
+
+            <!-- شريط الإدخال السفلي -->
+            <form class="chat-input-area hidden" id="chatForm" onsubmit="event.preventDefault();">
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                <button type="button" class="media-btn" onclick="document.getElementById('imageInput').click()" aria-label="إرفاق صورة">📷</button>
+
+
+
+              
+          <button id="recordBtn" type="button" class="media-btn">🎙️</button>
+<button id="stopRecordBtn" type="button" class="media-btn" style="display: none;">⏹️</button>
+<audio id="audioPreview" controls style="display: none; max-width: 150px;"></audio>
+<button id="sendAudioBtn" type="button" class="send-btn" style="display: none;">🚀</button>
+
+
+
+              
+                <button type="submit" class="send-btn" onclick="sendPrivateMessage()" aria-label="إرسال الرسالة">
+                    <svg viewBox="0 0 24 24" width="22" height="22">
+                        <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </form>
+        </main>
+    </div>
+
+    <!-- النافذة 1: ملفي الشخصي -->
+    <div class="modal hidden" id="profileModal" onclick="closeModalOnOutsideClick(event, 'profileModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👤 ملفي الشخصي</h2>
+                <button class="save-btn" onclick="saveProfile()">💾 حفظ</button>
+            </div>
+            <div class="modal-body">
+                <div class="avatar-upload">
+                    <div class="avatar-preview" id="avatarPreview">💬</div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewImage(event)">
+                    <button class="btn secondary-btn" onclick="document.getElementById('avatarInput').click()">تغيير الصورة</button>
+                </div>
+                <div class="input-group"><input type="text" id="profileFullName" placeholder=" "><label>الاسم الكامل</label></div>
+                <div class="input-group"><input type="text" id="profileUsername" placeholder=" "><label>اسم المستخدم</label></div>
+                <div class="input-group"><input type="date" id="profileBirthdate" placeholder=" "><label class="date-label">تحديد المواليد</label></div>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('profileModal')">إغلاق</button>
+        </div>
+    </div>
+
+
+
+
+
+<!-- نافذة المتجر الملكي -->
+<div class="modal hidden" id="royalStoreModal" onclick="closeModalOnOutsideClick(event, 'royalStoreModal')">
+    <div class="modal-content royal-store-content">
+        <div class="modal-header">
+            <h2>🛍️ المتجر الملكي لشراء الرتب</h2>
+        </div>
+        <div class="modal-body settings-list" id="royalStoreItems">
+            <div style="text-align: center; margin-bottom: 15px; font-size: 13px; color: #ffd700;">
+                ✨ اختر الرتبة الملكية التي تناسب مقامك الراقي ✨
+            </div>
+            
+            <!-- سيتم تعبئة الرتب هنا أو يمكنك إرسالها لنقوم بوضعها -->
+            <div class="store-item-placeholder" style="text-align: center; padding: 20px; color: #94a3b8;">
+                بانتظار تفاصيل الرتب والأسعار منك...
+            </div>
+
+            <button class="btn close-btn" onclick="closeModal('royalStoreModal')">إغلاق</button>
+        </div>
+    </div>
+</div>
+  
+
+
+
+  
+    <!-- النافذة 2: الإعدادات -->
+    <div class="modal hidden" id="settingsModal" onclick="closeModalOnOutsideClick(event, 'settingsModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>⚙️ الإعدادات</h2></div>
+            <div class="modal-body settings-list">
+
+              
+                <button onclick="toggleTheme()">🌓 تغيير نمط التطبيق (ليلي / نهاري)</button>
+                <button onclick="loadBlockedUsers()">🚫 عرض قائمة المحظورين</button>
+                <div style="margin: 10px 0;">
+  <label style="display: block; margin-bottom: 5px;">🌐 لغة التطبيق:</label>
+  <select onchange="changeAppLanguage(this.value)" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff;">
+    <option value="ar">العربية 🇮🇶</option>
+    <option value="en">English 🇬🇧</option>
+  </select>
+</div>
+
+                <div id="blockedUsersContainer" class="hidden" style="margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; text-align: right; max-height: 150px; overflow-y: auto;">
+                    <p style="font-size: 13px; color: #64748b; margin-bottom: 8px;">الأشخاص المحظورون:</p>
+                    <div id="blockedListArea"></div>
+                </div>                       
+<button onclick="window.location.href='ranks.html'">نظام الرتب الملكية</button>
+
+
+
+
+
+
+              
+                <button onclick="window.location.href='privacy.html'">الخصوصية وأمان البيانات</button>
+
+
+
+              
+                <button onclick="window.location.href='about.html'">حول التطبيق</button>
+
+
+
+              
+                <button onclick="window.location.href='index.html'">➕ إضافة حساب جديد آخر</button>
+
+
+
+              
+
+              
+                <button class="danger-action" onclick="window.location.href='index.html'">🚪 تسجيل الخروج</button>
+                <button class="danger-action" onclick="deleteAccountPermanently()">⚠️ حذف الحساب نهائياً</button>
+            </div>
+
+
+<button id="royalStoreBtn" onclick="window.location.href='royal-store.html'">🛍️ المتجر الملكي</button>
+
+
+
+
+
+<button class="menu-btn" onclick="window.location.href='account.html'">
+    <span class="account-btn-text">👤 حسابي</span>
+</button>
+
+
+
+          
+
+          
+<button class="settings-btn" onclick="openSuggestionsPage()">
+    💡 اقترح
+</button>
+
+
+    <button class="menu-btn" onclick="window.location.href='chat_lock_setup.html'">
+        🔒 قفل الدردشة
+    </button>
+
+
+
+              <!-- زر لوحة المطورين يظهر فقط للمطور -->
+    <button class="menu-btn" id="devPanelBtn" style="display: none; background: rgba(2, 132, 199, 0.2); border: 1px solid #0284c7;" onclick="window.location.href='developer-logs.html'">
+        🔒 لوحة تحكم المطور
+    </button>
+
+
+
+
+
+
+          <!-- زر فتح نافذة كود الدعوة داخل الإعدادات -->
+<button class="settings-btn" onclick="openReferralModal()" style="width: 100%; padding: 12px; margin-bottom: 10px; background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+    👑 كود الدعوة الخاص بي
+</button>
+
+<!-- النافذة المنبثقة الخاص بكود الدعوة -->
+<div id="referralModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); width: 85%; max-width: 350px; padding: 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        
+        <h3 style="color: #fff; margin-bottom: 8px; font-size: 18px;">👑 كود الدعوة الخاص بك</h3>
+        <p style="color: #94a3b8; font-size: 12px; margin-bottom: 15px;">شارك هذا الكود مع أصدقائك للحصول على رتبة "ملك الشات"!</p>
+        
+        <!-- صندوق عرض الكود مع زر النسخ -->
+        <div style="display: flex; align-items: center; background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 6px 10px; margin-bottom: 15px;">
+            <input type="text" id="myReferralCodeInput" value="جاري التحميل..." readonly style="width: 100%; background: transparent; border: none; color: #f59e0b; font-weight: bold; font-size: 13px; text-align: center; outline: none;" />
+            <button onclick="copyReferralCodeFromInput()" style="background: #f59e0b; color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; shrink: 0;">
+                نسخ
+            </button>
+        </div>
+
+        <button onclick="closeReferralModal()" style="width: 100%; padding: 10px; background: #ef4444; color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer;">
+            إغلاق
+        </button>
+    </div>
+</div>
+
+
+          
+          
+            <button class="btn close-btn" onclick="closeModal('settingsModal')">إغلاق</button>
+
+
+
+
+
+
+
+
+          
+
+<button type="button" onclick="window.location.href='developer-logs.html'" style="background: #0284c7; color: #ffffff; width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+    📋 خاصة بالمطور
+</button>
+
+
+
+<button onclick="window.location.href='admin-panel.html'" style="width: 100%; background: #0284c7; color: #ffffff; border: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px;">
+    🛠️ لوحة المطور
+</button>
+
+
+
+
+
+          
+        </div>
+    </div>
+
+    <!-- النافذة 3: إضافة شخص -->
+    <div class="modal hidden" id="addPersonModal" onclick="closeModalOnOutsideClick(event, 'addPersonModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>➕ إضافة شخص جديد</h2></div>
+            <div class="modal-body">
+                <div class="input-group"><input type="text" id="addSearchInput" required placeholder=" "><label>اسم المستخدم أو رقم الهاتف</label></div>
+                <button class="btn" onclick="addNewContact()">إضافة</button>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('addPersonModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 4: ملف الطرف الآخر -->
+    <div class="modal hidden" id="targetProfileModal" onclick="closeModalOnOutsideClick(event, 'targetProfileModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>👤 الملف الشخصي للصديق</h2></div>
+            <div class="modal-body" style="text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div class="avatar-preview" id="targetAvatar" style="width: 90px; height: 90px; font-size: 36px; margin-bottom: 10px;">💬</div>
+                <div>
+                    <h3 id="targetFullName" style="margin-bottom: 5px;">الاسم الكامل</h3>
+                    <p id="targetUsername" style="color: #64748b; font-size: 14px;">@username</p>
+                </div>
+                <hr style="width: 100%; border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+                <button class="btn" id="blockBtn" onclick="handleBlockAction()" style="background: #ef4444; margin-bottom: 5px;">🚫 حظر المستخدم</button>
+            </div>
+            <button class="btn close-btn" onclick="closeModal('targetProfileModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 5: إضافة مرسوم ملكي جديد -->
+    <div class="modal hidden" id="addStoryModal" onclick="closeModalOnOutsideClick(event, 'addStoryModal')">
+        <div class="modal-content">
+            <div class="modal-header"><h2>📜 مرسوم ملكي جديد</h2></div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="storyTextInput" required placeholder=" ">
+                    <label>اكتب نص المرسوم هنا...</label>
+                </div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <input type="file" id="storyImageInput" accept="image/*" style="display: none;" onchange="previewStoryImage(event)">
+                    <button type="button" class="btn secondary-btn" onclick="document.getElementById('storyImageInput').click()">📸 إرفاق صورة ملكية</button>
+                    <div id="storyImagePreview" style="margin-top: 10px; max-height: 150px; overflow: hidden; border-radius: 8px; display: flex; justify-content: center;"></div>
+                </div>
+                <button type="button" class="btn" onclick="publishRoyalDecree()" style="margin-top: 15px; background: #22c55e;">📢 نشر المرسوم</button>
+            </div>
+            <button type="button" class="btn close-btn" onclick="closeModal('addStoryModal')">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- النافذة 6: لوحة الشرف الملكية -->
+    <div class="modal hidden" id="leaderboardModal" onclick="closeModalOnOutsideClick(event, 'leaderboardModal')">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2>🏆 لوحة الشرف للمملكة</h2>
+                <button type="button" class="close-btn" onclick="closeModal('leaderboardModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-bottom: 15px;">فرسان المملكة الأكثر نشاطاً وولاءً في البلاط الملكي!</p>
+                <div id="leaderboardList" class="leaderboard-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- النافذة 7: صندوق النميمة المجهول -->
+    <div class="modal hidden" id="gossipModal" onclick="closeModalOnOutsideClick(event, 'gossipModal')">
+        <div class="modal-content" style="max-width: 400px; border: 1px solid rgba(139, 92, 246, 0.3);">
+            <div class="modal-header">
+                <h2>🤫 صندوق النميمة</h2>
+                <button type="button" class="close-btn" onclick="closeModal('gossipModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; text-align: center;">اكتب ما تشاء بجرأة! هويتك ستظل مجهولة بالكامل.</p>
+                <textarea id="gossipText" placeholder="اكتب سرك، اعترافك، أو نميمتك هنا..." style="width: 100%; height: 100px; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #1a1a26; color: white; resize: none; font-family: inherit;"></textarea>
+                <button type="button" class="btn" onclick="sendAnonymousGossip()" style="margin-top: 15px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; font-weight: bold; width: 100%;">🚀 إرسال سراً للجميع</button>
+                <button type="button" class="btn close-btn" onclick="closeModal('gossipModal')" style="margin-top: 10px; width: 100%; background: transparent; border: 1px solid #475569; color: #94a3b8;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- النافذة 8: جريدة النميمة الملكية -->
+    <div class="modal hidden" id="newspaperModal" onclick="closeModalOnOutsideClick(event, 'newspaperModal')">
+        <div class="modal-content" style="max-width: 450px; border: 1px solid rgba(251, 191, 36, 0.3); max-height: 80vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h2>📰 جريدة النميمة الملكية</h2>
+                <button type="button" class="close-btn" onclick="closeModal('newspaperModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; flex: 1;">
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; text-align: center;">آخر الأخبار السرية، الاعترافات، والهمسات!</p>
+                <div id="gossipList" style="display: flex; flex-direction: column; gap: 12px; padding-bottom: 10px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+  
+
+
+  <!-- زر الترجمة التلقائية لكل شيء في الصفحة -->
+<div id="google_translate_element"></div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'ar',
+    includedLanguages: 'en,ar',
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
+
+
+
+
+
+  <!-- نافذة عرض المرسوم أو الستوري الملكي المخصصة -->
+<div id="royalStoryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+    <div style="background:#1e1b4b; border:2px solid #fbbf24; border-radius:15px; padding:20px; width:90%; max-width:400px; color:#fff; text-align:center; position:relative; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <span onclick="closeRoyalModal()" style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px; color:#fbbf24;">&times;</span>
+        <h3 id="royalModalTitle" style="color:#fbbf24; margin-bottom:15px;">📜 مرسوم ملكي</h3>
+        <p id="royalModalContent" style="font-size:16px; line-height:1.6; word-break:break-word;"></p>
+    </div>
+</div>
+
+
+  
+
+
+
+  <!-- نافذة المعاينة والخيارات عند الضغط المطول -->
+<div id="chatPreviewOverlay" class="chat-preview-overlay">
+    <div id="previewCardWrapper" class="preview-card-wrapper">
+        <!-- يتم نسخ المحادثة المضغوط عليها هنا تلقائياً -->
+    </div>
+    
+    <div class="preview-actions">
+        <button id="pinChatBtn" class="preview-btn pin">
+            📌 تثبيت المحادثة
+        </button>
+      <button id="lockChatBtn" class="preview-btn pin" onclick="lockCurrentChat()">🔒 قفل المحادثة</button>
+
+
+        <button id="deleteChatBtn" class="preview-btn delete">
+            🗑️ حذف المحادثة
+        </button>
+    </div>
+</div>
+
+
+
+
+
+
+</div>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    function translateSuggest() {
+        const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+        if (lang === 'en') {
+            document.querySelectorAll('button, a, div, span, p').forEach(el => {
+                if (el.children.length === 0 && el.textContent.includes('اقترح')) {
+                    el.textContent = '💡 Suggest';
+                }
+            });
+        }
+    }
+
+    // تشغيل عند التحميل
+    document.addEventListener('DOMContentLoaded', translateSuggest);
+
+    // مراقبة الشاشة باستمرار في حال تم فتح القائمة بعد التحميل
+    const observer = new MutationObserver(translateSuggest);
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
+
+
+
+
+
+
+
+  
+<!-- ==================== النظام الكامل لقفل وإلغاء قفل الدردشات ==================== -->
+<style>
+  .lock-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100% !important; height: 100% !important;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+    display: none; justify-content: center; align-items: center; z-index: 999999;
+  }
+  .lock-modal-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    padding: 24px; text-align: center; color: #fff; width: 85%; max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  .lock-pin-inputs { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+  .lock-pin-inputs input {
+    width: 45px; height: 50px; text-align: center; font-size: 22px; font-weight: bold;
+    border-radius: 10px; border: 1px solid #475569; background: #0f172a; color: #38bdf8; outline: none;
+  }
+  .lock-cancel-btn {
+    background: #ef4444; color: #fff; border: none; padding: 10px 20px;
+    border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%;
+  }
+</style>
+
+<div id="unlockModalOverlay" class="lock-modal-overlay">
+  <div class="lock-modal-card">
+    <h3 style="margin: 0 0 8px 0;">🔒 المحادثة مقفولة</h3>
+    <p style="margin: 0; font-size: 13px; color: #94a3b8;">أدخل رمز الأمان للفتح</p>
+    <div class="lock-pin-inputs">
+      <input type="password" maxlength="1" class="pin-field" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-field" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-field" inputmode="numeric">
+      <input type="password" maxlength="1" class="pin-field" inputmode="numeric">
+    </div>
+    <button class="lock-cancel-btn" onclick="closeUnlockModal()">إلغاء</button>
+  </div>
+</div>
+
+<script>
+window.targetChatElementToOpen = window.targetChatElementToOpen || null;
+window.bypassChatLock = window.bypassChatLock || false;
+
+function getChatUniqueKey(element) {
+    if (!element) return null;
+    const nameEl = element.querySelector('.chat-name, .username, h4, h3, span');
+    let uniqueId = element.getAttribute('data-chat-id') || element.getAttribute('data-id') || (nameEl ? nameEl.textContent.trim() : null);
+    return uniqueId;
+}
+
+// تحديث نص وشكل زر القفل ديناميكياً عند فتح قائمة الخيارات المنبثقة
+document.addEventListener('contextmenu', function() { checkAndUpdateLockButton(); }, true);
+document.addEventListener('click', function(e) {
+    // إذا تم النقر مطولاً أو فتح القائمة بطريقة ما
+    setTimeout(checkAndUpdateLockButton, 100);
+});
+
+function checkAndUpdateLockButton() {
+    const lockBtn = document.getElementById('lockChatBtn');
+    if (!lockBtn) return;
+
+    let activeKey = null;
+    if (typeof currentLongPressedChatId !== 'undefined' && currentLongPressedChatId) {
+        activeKey = String(currentLongPressedChatId).trim();
+    } else {
+        const previewCard = document.querySelector('#previewCardWrapper, .preview-card-wrapper');
+        activeKey = getChatUniqueKey(previewCard);
+    }
+
+    if (!activeKey) return;
+
+    let lockedChats = JSON.parse(localStorage.getItem('locked_chats_list') || '[]');
+    if (lockedChats.includes(activeKey)) {
+        lockBtn.innerHTML = '🔓 إلغاء قفل المحادثة';
+        lockBtn.style.background = '#334155';
+    } else {
+        lockBtn.innerHTML = '🔒 قفل المحادثة';
+        lockBtn.style.background = '';
+    }
+}
+
+// 1. التبديل بين القفل وإلغاء القفل عند النقر على الزر في القائمة المنبثقة
+document.addEventListener('click', function(e) {
+    const lockBtn = e.target.closest('#lockChatBtn');
+    if (!lockBtn) return;
+
+    const isLockEnabled = localStorage.getItem('chat_lock_enabled');
+    const savedPin = localStorage.getItem('chat_lock_pin');
+
+    if (!isLockEnabled || !savedPin) {
+        alert('يرجى تفعيل خيار قفل الدردشات وتعيين رمز الأمان من الإعدادات أولاً!');
+        window.location.href = 'chat_lock_setup.html';
+        return;
+    }
+
+    let activeKey = null;
+    if (typeof currentLongPressedChatId !== 'undefined' && currentLongPressedChatId) {
+        activeKey = String(currentLongPressedChatId).trim();
+    } else {
+        const previewCard = document.querySelector('#previewCardWrapper, .preview-card-wrapper');
+        activeKey = getChatUniqueKey(previewCard);
+    }
+
+    if (activeKey && activeKey !== "null" && activeKey !== "undefined") {
+        let lockedChats = JSON.parse(localStorage.getItem('locked_chats_list') || '[]');
+        
+        if (lockedChats.includes(activeKey)) {
+            // إذا كانت مقفولة، نقوم بإلغاء قفلها مباشرة
+            lockedChats = lockedChats.filter(id => id !== activeKey);
+            localStorage.setItem('locked_chats_list', JSON.stringify(lockedChats));
+            alert('تم إلغاء قفل المحادثة بنجاح! 🔓');
+        } else {
+            // إذا لم تكن مقفولة، نقوم بقفلها
+            lockedChats.push(activeKey);
+            localStorage.setItem('locked_chats_list', JSON.stringify(lockedChats));
+            alert('تم قفل المحادثة بنجاح! 🔒');
+        }
+
+        const overlay = document.getElementById('chatPreviewOverlay');
+        if (overlay) overlay.style.display = 'none';
+    } else {
+        alert('تعذر تحديد المحادثة.');
+    }
+});
+
+// 2. التحقق من الرمز السري لفتح المحادثة المقفولة
+document.querySelectorAll('.pin-field').forEach((input, index, inputs) => {
+    input.addEventListener('input', () => {
+        if (input.value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+        
+        let enteredPin = Array.from(inputs).map(i => i.value).join('');
+        if (enteredPin.length === 4) {
+            const savedPin = localStorage.getItem('chat_lock_pin');
+            if (enteredPin === savedPin) {
+                document.getElementById('unlockModalOverlay').style.display = 'none';
+                window.bypassChatLock = true;
+                if (window.targetChatElementToOpen) {
+                    window.targetChatElementToOpen.click();
+                    window.targetChatElementToOpen = null;
+                }
+            } else {
+                alert('الرمز غير صحيح!');
+                inputs.forEach(i => i.value = '');
+                inputs[0].focus();
+            }
+        }
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+});
+
+function closeUnlockModal() {
+    document.getElementById('unlockModalOverlay').style.display = 'none';
+    window.targetChatElementToOpen = null;
+    document.querySelectorAll('.pin-field').forEach(i => i.value = '');
+}
+
+// 3. منع فتح المحادثة المقفولة وطلب الرمز
+document.addEventListener('click', function(e) {
+    if (window.bypassChatLock) {
+        window.bypassChatLock = false;
+        return; 
+    }
+
+    const chatCard = e.target.closest('.chat-item, .chat-card, [data-chat-id], [data-id]');
+    if (!chatCard) return;
+
+    let chatKey = getChatUniqueKey(chatCard);
+    if (!chatKey || chatKey === "null" || chatKey === "undefined") return;
+
+    let lockedChats = JSON.parse(localStorage.getItem('locked_chats_list') || '[]');
+
+    if (lockedChats.includes(chatKey)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        window.targetChatElementToOpen = chatCard;
+
+        const inputs = document.querySelectorAll('.pin-field');
+        inputs.forEach(i => i.value = '');
+        document.getElementById('unlockModalOverlay').style.display = 'flex';
+        setTimeout(() => inputs[0].focus(), 100);
+    }
+}, true);
+</script>
+<!-- ========================================================================= -->
+
+
+
+
+
+ <!-- ==================== نافذة التنبيهات المخصصة داخل التطبيق ==================== -->
+<style>
+  .custom-alert-overlay {
+    position: fixed; top: 0; left: 0; width: 100% !important; height: 100% !important;
+    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px);
+    display: none; justify-content: center; align-items: center; z-index: 1000000;
+  }
+  .custom-alert-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    padding: 24px; text-align: center; color: #fff; width: 85%; max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  .custom-alert-btn {
+    background: #38bdf8; color: #0f172a; border: none; padding: 10px 20px;
+    border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 15px;
+  }
+</style>
+
+<div id="customAlertOverlay" class="custom-alert-overlay">
+  <div class="custom-alert-card">
+    <h3 id="customAlertTitle" style="margin: 0 0 8px 0; color: #38bdf8;">تنبيه</h3>
+    <p id="customAlertMessage" style="margin: 0 0 15px 0; font-size: 14px; color: #cbd5e1;"></p>
+    <button class="custom-alert-btn" onclick="closeCustomAlert()">حسناً</button>
+  </div>
+</div>
+
+<script>
+function showAppAlert(message, title = "تنبيه النظام") {
+    document.getElementById('customAlertTitle').textContent = title;
+    document.getElementById('customAlertMessage').innerHTML = message;
+    document.getElementById('customAlertOverlay').style.display = 'flex';
+}
+
+function closeCustomAlert() {
+    document.getElementById('customAlertOverlay').style.display = 'none';
+}
+
+// إعادة توجيه أي أمر alert قديم ليظهر عبر النافذة المصممة داخل التطبيق تلقائياً
+window.alert = function(msg) {
+    showAppAlert(msg, "تنبيه التطبيق");
+};
+</script>
+<!-- ====================================================================== -->
+
+
+
+
+
+  <!-- ==================== إضافة ميزة "نسيت الرمز" برمجياً ==================== -->
+<style>
+  .forgot-pin-link {
+    display: block; margin-top: 15px; font-size: 13px; color: #38bdf8; 
+    text-decoration: underline; cursor: pointer; text-align: center; font-family: tahoma, sans-serif;
+  }
+  .recovery-inputs { display: flex; gap: 15px; justify-content: center; margin: 20px 0; }
+  .recovery-inputs input {
+    width: 55px; height: 60px; text-align: center; font-size: 24px; font-weight: bold;
+    border-radius: 10px; border: 1px solid #475569; background: #0f172a; color: #38bdf8; outline: none;
+  }
+  .action-btn-primary {
+    background: #38bdf8; color: #0f172a; border: none; padding: 10px 20px;
+    border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 10px;
+  }
+  .action-btn-secondary {
+    background: #334155; color: #fff; border: none; padding: 10px 20px;
+    border-radius: 8px; font-size: 14px; cursor: pointer; width: 100%; font-weight: bold;
+  }
+</style>
+
+<!-- نافذة استعادة الرمز (أول رقم وآخر رقم) -->
+<div id="recoveryModalOverlay" class="custom-alert-overlay">
+  <div class="custom-alert-card">
+    <h3 style="margin: 0 0 8px 0; color: #38bdf8;">استعادة الرمز</h3>
+    <p style="margin: 0; font-size: 13px; color: #94a3b8;">أدخل (أول رقم) و (آخر رقم) من رمزك</p>
+    <div class="recovery-inputs">
+      <input type="password" maxlength="1" class="rec-field" inputmode="numeric" placeholder="الأول">
+      <input type="password" maxlength="1" class="rec-field" inputmode="numeric" placeholder="الأخير">
+    </div>
+    <button class="action-btn-primary" onclick="verifyRecoveryPins()">تحقق</button>
+    <button class="custom-alert-btn" onclick="closeRecoveryModal()" style="margin-top:0; background:#ef4444; color:#fff;">إلغاء</button>
+  </div>
+</div>
+
+<!-- نافذة الخيارات بعد نجاح الاستعادة -->
+<div id="newPinOptionsOverlay" class="custom-alert-overlay">
+  <div class="custom-alert-card">
+    <h3 style="margin: 0 0 8px 0; color: #38bdf8;">إدارة الحماية</h3>
+    <p style="margin: 0 0 20px 0; font-size: 13px; color: #94a3b8;">تم التحقق بنجاح. ماذا تريد أن تفعل؟</p>
+    <button class="action-btn-primary" onclick="promptCreateNewPin()">إنشاء رمز قفل جديد</button>
+    <button class="action-btn-secondary" onclick="disableChatLockCompletely()">إلغاء تفعيل قفل الدردشة</button>
+  </div>
+</div>
+
+<script>
+// إضافة زر "نسيت رمز القفل" إلى النافذة الحالية تلقائياً
+setTimeout(() => {
+    const unlockModalCard = document.querySelector('#unlockModalOverlay .lock-modal-card');
+    if (unlockModalCard && !document.getElementById('injectForgotBtn')) {
+        const forgotBtn = document.createElement('span');
+        forgotBtn.id = 'injectForgotBtn';
+        forgotBtn.className = 'forgot-pin-link';
+        forgotBtn.innerText = 'نسيت رمز القفل؟';
+        forgotBtn.onclick = openForgotPinModal;
+        unlockModalCard.appendChild(forgotBtn);
+    }
+}, 500); // ننتظر نصف ثانية للتأكد من تحميل العناصر السابقة
+
+function openForgotPinModal() {
+    document.getElementById('unlockModalOverlay').style.display = 'none';
+    document.querySelectorAll('.rec-field').forEach(i => i.value = '');
+    document.getElementById('recoveryModalOverlay').style.display = 'flex';
+    setTimeout(() => document.querySelectorAll('.rec-field')[0].focus(), 100);
+}
+
+function closeRecoveryModal() {
+    document.getElementById('recoveryModalOverlay').style.display = 'none';
+}
+
+function verifyRecoveryPins() {
+    const recFields = document.querySelectorAll('.rec-field');
+    const firstInput = recFields[0].value;
+    const lastInput = recFields[1].value;
+    const savedPin = localStorage.getItem('chat_lock_pin') || '';
+
+    if (savedPin.length === 4) {
+        if (firstInput === savedPin[0] && lastInput === savedPin[3]) {
+            document.getElementById('recoveryModalOverlay').style.display = 'none';
+            document.getElementById('newPinOptionsOverlay').style.display = 'flex';
+        } else {
+            showAppAlert('الأرقام المدخلة غير مطابقة للرمز الصحيح!', 'خطأ في التحقق');
+            recFields.forEach(i => i.value = '');
+            recFields[0].focus();
+        }
+    } else {
+        showAppAlert('لا يوجد رمز قفل مخزن حالياً.', 'خطأ');
+        closeRecoveryModal();
+    }
+}
+
+function promptCreateNewPin() {
+    document.getElementById('newPinOptionsOverlay').style.display = 'none';
+    
+    // استخدام دالة prompt الافتراضية هنا لتسهيل إدخال الرمز الجديد بسرعة
+    let newPin = prompt('أدخل رمز القفل الجديد (مكون من 4 أرقام):');
+    if (newPin && newPin.length === 4 && /^\d+$/.test(newPin)) {
+        localStorage.setItem('chat_lock_pin', newPin);
+        localStorage.setItem('chat_lock_enabled', 'true');
+        showAppAlert('تم تحديث رمز القفل بنجاح! 🔒', 'نجاح');
+    } else if (newPin) {
+        showAppAlert('الرجاء إدخال 4 أرقام فقط.', 'خطأ');
+    }
+}
+
+function disableChatLockCompletely() {
+    localStorage.removeItem('chat_lock_pin');
+    localStorage.removeItem('chat_lock_enabled');
+    localStorage.removeItem('locked_chats_list');
+    document.getElementById('newPinOptionsOverlay').style.display = 'none';
+    showAppAlert('تم إلغاء تفعيل قفل الدردشات بالكامل بنجاح.', 'إلغاء الحماية');
+}
+</script>
+<!-- ========================================================================= -->
+
+
+
+
+  <script>
+// تفعيل زر إلغاء لتخفيض ونزع نافذة الرمز تلقائياً عند النقر عليه
+document.addEventListener('click', function(e) {
+    // التحقق مما إذا كان العنصر المنقور هو زر الإلغاء أو النص الموجود تحته
+    const cancelBtn = e.target.closest('.lock-cancel-btn, button');
+    if (cancelBtn && (cancelBtn.textContent.includes('إلغاء') || cancelBtn.style.background === 'rgb(239, 68, 68)')) {
+        const overlay = document.getElementById('unlockModalOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+            // تفريغ حقول الرمز تنظيفاً للذاكرة
+            document.querySelectorAll('.pin-field').forEach(i => i.value = '');
+            window.targetChatElementToOpen = null;
+        }
+    }
+});
+</script>
+
+
+
+<script>
+// دالة لتحديث ترجمة الأزرار فوراً بناءً على لغة التطبيق المخزنة
+function updateChatMenuLanguage() {
+    const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+    
+    // 1. زر قفل الدردشة
+    const lockBtn = document.querySelector('button[onclick*="chat_lock_setup.html"]');
+    if (lockBtn) {
+        if (lang === 'en') {
+            lockBtn.innerHTML = '🔒 Chat Lock';
+        } else {
+            lockBtn.innerHTML = '🔒 قفل الدردشة';
+        }
+    }
+    
+    // 2. زر اقترح (يتم البحث عنه عبر دالة أو نص)
+    const suggestBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes('Suggestion') || b.textContent.includes('اقترح') || b.textContent.includes('Suggest'));
+    if (suggestBtn) {
+        if (lang === 'en') {
+            suggestBtn.innerHTML = '💡 Suggest';
+        } else {
+            suggestBtn.innerHTML = '💡 اقترح';
+        }
+    }
+}
+
+// التشغيل عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', updateChatMenuLanguage);
+
+// التشغيل أيضاً عند فتح نافذة الإعدادات لضمان تحديث النصوص فور النقر عليها
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.settings-btn, [onclick*="settings"]')) {
+        setTimeout(updateChatMenuLanguage, 50);
+    }
+});
+</script>
+
+
+
+
+
+
+  <script>
+// كود لحل مشكلة عدم ظهور المحادثة الجديدة في السجل وتحديث القائمة تلقائياً
+(function() {
+    // 1. مراقبة عمليات إرسال الرسائل والنقر على أزرار الإرسال
+    document.addEventListener('click', function(e) {
+        const target = e.target.closest('button, input[type="submit"]');
+        if (!target) return;
+        
+        // التحقق مما إذا كان الزر هو زر إرسال رسالة
+        const text = target.textContent.trim();
+        if (text === 'إرسال' || text === 'Send' || target.id.includes('send') || target.classList.contains('send-btn')) {
+            // الانتظار قليلاً حتى يتم حفظ الرسالة في قاعدة البيانات ثم تحديث القائمة
+            setTimeout(() => {
+                // إعادة تحميل قائمة الدردشات إذا كانت الدالة موجودة في التطبيق
+                if (typeof loadChats === 'function') {
+                    loadChats();
+                } else if (typeof fetchChats === 'function') {
+                    fetchChats();
+                } else if (typeof displayChatList === 'function') {
+                    displayChatList();
+                } else {
+                    // تحديث العناصر أو إعادة جلب الصفحة إن لم توجد دالة جاهزة
+                    const chatListContainer = document.querySelector('.chat-list, .chats-container, #chatsList');
+                    if (!chatListContainer) {
+                        // محاولة حفظ مؤشر لتحديث السجل عند العودة
+                        localStorage.setItem('wasl_refresh_chats', 'true');
+                    }
+                }
+            }, 500);
+        }
+    });
+
+    // 2. تحديث القائمة تلقائياً عند تحميل الصفحة في حال وجود سجل معلق
+    window.addEventListener('load', () => {
+        if (localStorage.getItem('wasl_refresh_chats') === 'true') {
+            localStorage.removeItem('wasl_refresh_chats');
+            if (typeof loadChats === 'function') loadChats();
+        }
+    });
+})();
+</script>
+
+
+
+
+
+
+<script>
+firebase.auth().onAuthStateChanged((user) => {
+    const container = document.getElementById('devBtnContainer');
+    if (!container) return;
+
+    const DEV_EMAIL = "ll9758829@gmail.com";
+
+    // التحقق الصارم من البريد الإلكتروني
+    if (user && user.email && user.email.toLowerCase().trim() === DEV_EMAIL) {
+        container.innerHTML = `
+            <button type="button" 
+                    onclick="window.location.href='developer-logs.html'" 
+                    style="background: #0284c7; color: #ffffff; width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: block;">
+                📋 سجل الحسابات (للمطور فقط)
+            </button>
+        `;
+    } else {
+        // تفريغ الحاوية فوراً لأي بريد آخر
+        container.innerHTML = '';
+    }
+});
+</script>
+
+
+
+
+
+
+
+  
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    const fixDevBtn = () => {
+        const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+        
+        // البحث الشامل في كل العقد النصية داخل الصفحة لتغيير الكلمة فوراً
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            if (lang === 'en') {
+                if (node.nodeValue.includes('خاصة بالمطور')) {
+                    node.nodeValue = node.nodeValue.replace(/خاصة بالمطور/g, 'Developer Only');
+                }
+            } else {
+                if (node.nodeValue.includes('Developer Only')) {
+                    node.nodeValue = node.nodeValue.replace(/Developer Only/g, 'خاصة بالمطور');
+                }
+            }
+        }
+    };
+
+    fixDevBtn();
+    setInterval(fixDevBtn, 300);
+});
+</script>
+
+
+
+
+
+
+
+
+  <!-- سكريبت الترجمة الآمن المحدث وشامل قائمة الإعدادات ونافذة الدعوة -->
+<script>
+(function() {
+    function safeTranslateAll() {
+        const lang = localStorage.getItem('wasl_app_lang') 
+                  || localStorage.getItem('appLanguage') 
+                  || 'ar';
+        const isEn = (lang === 'en');
+
+        // 1. ترجمة زر الهيدر العلوي
+        const kingBtn = document.getElementById('kingInfoBtn');
+        if (kingBtn) {
+            kingBtn.innerText = isEn ? '👑 How to be Chat King?' : '👑 كيف تصبح ملك الشات؟';
+        }
+
+        // 2. ترجمة نافذة "نظام ملك الشات"
+        const kingModal = document.getElementById('kingModal');
+        if (kingModal) {
+            kingModal.dir = isEn ? 'ltr' : 'rtl';
+
+            const title = kingModal.querySelector('h3');
+            if (title) title.innerText = isEn ? '👑 Chat King System' : '👑 نظام ملك الشات';
+
+            const closeBtn = kingModal.querySelector('button');
+            if (closeBtn) closeBtn.innerText = isEn ? 'Close' : 'إغلاق';
+
+            const paragraphs = kingModal.querySelectorAll('p');
+            if (paragraphs.length >= 2) {
+                paragraphs[0].innerHTML = isEn 
+                    ? '📌 <b style="color: #f59e0b;">What is the benefit?</b><br>Get featured by showing your <b>real name</b> and the <b>👑 Chat King</b> badge in gold color for 7 consecutive days instead of "Anonymous User"!'
+                    : '📌 <b style="color: #f59e0b;">ما الفائدة؟</b><br>تتميز بإظهار <b>اسمك الحقيقي</b> وشارة <b>👑 ملك الشات</b> باللون الذهبي لمدة 7 أيام متواصلة بدلاً من "Anonymous User"!';
+
+                paragraphs[1].innerHTML = isEn 
+                    ? '🚀 <b style="color: #f59e0b;">How to do it?</b>'
+                    : '🚀 <b style="color: #f59e0b;">كيف تفعل ذلك؟</b>';
+            }
+
+            const listItems = kingModal.querySelectorAll('ol li');
+            if (listItems.length >= 4) {
+                if (isEn) {
+                    listItems[0].innerHTML = 'Go to <b>Settings</b>, tap <b>"My Invite Code"</b>, and tap copy.';
+                    listItems[1].innerHTML = 'Share the code with your friends or post it online.';
+                    listItems[2].innerHTML = 'Your friend enters the code under <b>"Invite Code"</b> when creating their account.';
+                    listItems[3].innerHTML = 'When <b>5 users</b> join using your code, you become the King instantly! 👑';
+                } else {
+                    listItems[0].innerHTML = 'اذهب إلى <b>الإعدادات</b> واضغط <b>"كود الدعوة الخاص بي"</b> واعمل نسخ.';
+                    listItems[1].innerHTML = 'شارك الكود مع أصدقائك أو انشره على الإنترنت.';
+                    listItems[2].innerHTML = 'يضع صديقك الكود أسفل حقل <b>"كود الدعوة"</b> عند إنشائه حسابه.';
+                    listItems[3].innerHTML = 'عند انضمام <b>5 مستخدمين</b> بكودك، تصبح الملك فوراً! 👑';
+                }
+            }
+        }
+
+        // 3. ترجمة عناصر القائمة ونافذة "كود الدعوة" وزر النسخ بالكامل
+        document.querySelectorAll('*').forEach(el => {
+            if (el.children.length === 0) {
+                const text = el.textContent.trim();
+
+                // زر قائمة الإعدادات
+                if (text.includes('كود الدعوة الخاص بي') || text.includes('My Invite Code')) {
+                    el.textContent = isEn ? '👑 My Invite Code' : 'كود الدعوة الخاص بي 👑';
+                }
+
+                // عنوان نافذة الدعوة
+                if (text.includes('كود الدعوة الخاص بك') || text.includes('Your Invite Code')) {
+                    el.textContent = isEn ? '👑 Your Invite Code' : '👑 كود الدعوة الخاص بك';
+                }
+
+                // نص الوصف داخل نافذة الدعوة
+                if (text.includes('شارك هذا الكود') || text.includes('Share this code')) {
+                    el.textContent = isEn 
+                        ? 'Share this code with your friends to get the "Chat King" status!' 
+                        : 'شارك هذا الكود مع أصدقائك للحصول على رتبة "ملك الشات"!';
+                }
+
+                // زر النسخ الأصفر
+                if (text === 'نسخ' || text === 'Copy') {
+                    el.textContent = isEn ? 'Copy' : 'نسخ';
+                }
+            }
+        });
+
+        // 4. ضبط اتجاه نافذة الدعوة المنبثقة
+        document.querySelectorAll('div').forEach(modal => {
+            if (modal.textContent.includes('Your Invite Code') || modal.textContent.includes('كود الدعوة الخاص بك')) {
+                if (modal.classList.contains('modal') || modal.style.position === 'fixed' || modal.querySelector('button')) {
+                    modal.dir = isEn ? 'ltr' : 'rtl';
+                }
+            }
+        });
+    }
+
+    // الفحص المستمر والتشغيل عند الأحداث
+    window.addEventListener('load', safeTranslateAll);
+    document.addEventListener('click', () => setTimeout(safeTranslateAll, 50));
+    setInterval(safeTranslateAll, 250);
+})();
+</script>
+
+
+
+
+
+  <!-- سكريبت إصلاح إرسال واستقبال الرسائل لحظياً -->
+<script>
+(function() {
+    // 1. ضمان وجود مسار محادثة موحد بين الطرفين (Sender & Receiver)
+    window.getUnifiedChatId = function(user1, user2) {
+        if (!user1 || !user2) return 'global_chat';
+        return [user1, user2].sort().join('_');
+    };
+
+    // 2. إصلاح دالة الإرسال لضمان رفع البيانات إلى Firebase
+    const originalSendMessage = window.sendMessage;
+    window.sendMessage = function(senderId, receiverId, messageText) {
+        if (!messageText || messageText.trim() === "") return;
+
+        const chatId = window.getUnifiedChatId(senderId, receiverId);
+
+        // إذا كنت تستخدم Firebase Realtime Database
+        if (typeof firebase !== 'undefined' && firebase.database) {
+            const messageData = {
+                senderId: senderId,
+                receiverId: receiverId,
+                text: messageText,
+                timestamp: firebase.database.ServerValue.TIMESTAMP || Date.now()
+            };
+
+            // الحفظ في المسار المشترك
+            firebase.database().ref('messages/' + chatId).push(messageData)
+                .then(() => {
+                    console.log("تم إرسال الرسالة بنجاح للمستلم");
+                })
+                .catch((error) => {
+                    console.error("خطأ في إرسال الرسالة:", error);
+                });
+        }
+
+        // استدعاء الدالة الأصلية إن وجدت للتعامل مع الواجهة
+        if (typeof originalSendMessage === 'function') {
+            originalSendMessage(senderId, receiverId, messageText);
+        }
+    };
+
+    // 3. الاستماع التلقائي والمستمر للرسائل الواردة للمستلم
+    window.listenForIncomingMessages = function(currentUserId, otherUserId, callback) {
+        if (typeof firebase === 'undefined' || !firebase.database) return;
+
+        const chatId = window.getUnifiedChatId(currentUserId, otherUserId);
+        const chatRef = firebase.database().ref('messages/' + chatId);
+
+        // إيقاف أي استماع قديم لمنع تكرار الرسائل
+        chatRef.off();
+
+        // الاستماع المباشر للرسائل الجديدة عند وصولها
+        chatRef.limitToLast(1).on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            if (msg && typeof callback === 'function') {
+                callback(msg);
+            }
+        });
+    };
+})();
+</script>
+
+
+
+
+
+  <script>
+function openDeveloperPanel() {
+    window.location.href = 'admin-panel.html';
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+<script>
+    function cleanAndFixHeader() {
+        const badgeMap = {
+            '👑': 'ملك الشات',
+            '🏰': 'الملك',
+            '🧝🏻': 'الأميرة',
+            '🔵': 'حساب موثق'
+        };
+
+        // 1. تنظيف كلمة "عادي" من الهيدر تماماً
+        const headerTitle = document.querySelector('.chat-header h3, .user-name, #chatTitle');
+        if (headerTitle && headerTitle.innerText.includes('عادي')) {
+            headerTitle.innerText = headerTitle.innerText.replace('عادي', '').trim();
+        }
+
+        // 2. إظهار/إخفاء الرتبة الملكية حسب الرمز
+        const elements = document.querySelectorAll('*');
+        elements.forEach(el => {
+            if (el.children.length === 0 && el.textContent.includes('الرتبة الملكية')) {
+                const titleText = headerTitle ? headerTitle.innerText : '';
+                
+                let currentBadge = null;
+                for (let b in badgeMap) {
+                    if (titleText.includes(b)) {
+                        currentBadge = b;
+                        break;
+                    }
+                }
+
+                if (currentBadge && badgeMap[currentBadge]) {
+                    el.textContent = `الرتبة الملكية: ${badgeMap[currentBadge]}`;
+                    el.style.display = 'block';
+                    el.style.color = '#2ecc71';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    setInterval(cleanAndFixHeader, 300);
+</script>
+
+  
+    <!-- مكتبات الفايربيس -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+    <script src="chat.js"></script>
+  <script src="chat_lock.js"></script>
+
+  
+</body>
+</html>

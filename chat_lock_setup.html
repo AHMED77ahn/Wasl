@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعيين رمز قفل الدردشات</title>
+    <style>
+        body { font-family: sans-serif; background: #121826; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .pin-box { display: flex; gap: 10px; margin: 20px 0; }
+        .pin-box input { width: 45px; height: 50px; text-align: center; font-size: 24px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #fff; }
+        button { padding: 12px 24px; background: #4f46e5; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h3>أدخل رمز الأمان (4 أرقام)</h3>
+    <div class="pin-box">
+        <input type="password" maxlength="1" class="pin-digit">
+        <input type="password" maxlength="1" class="pin-digit">
+        <input type="password" maxlength="1" class="pin-digit">
+        <input type="password" maxlength="1" class="pin-digit">
+    </div>
+    <button onclick="savePin()">حفظ وتفعيل القفل</button>
+  <button type="button" onclick="localStorage.setItem('open_settings_on_load', 'true'); window.location.href='chat.html';" style="
+    background: transparent; 
+    color: #94a3b8; 
+    border: none; 
+    padding: 10px; 
+    font-size: 14px; 
+    cursor: pointer; 
+    display: block; 
+    margin: 15px auto 0 auto; 
+    text-decoration: underline;
+">
+    ← رجوع إلى الإعدادات
+</button>
+
+
+    <script>
+        const inputs = document.querySelectorAll('.pin-digit');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
+            });
+        });
+
+        function savePin() {
+            let pin = '';
+            inputs.forEach(i => pin += i.value);
+            if (pin.length === 4) {
+                localStorage.setItem('chat_lock_pin', pin);
+                localStorage.setItem('chat_lock_enabled', 'true');
+                alert('تم تفعيل ميزة قفل الدردشات بنجاح!');
+                window.history.back();
+            } else {
+                alert('يرجى كتابة 4 أرقام كاملة.');
+            }
+        }
+    </script>
+
+
+
+
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+    
+    if (lang === 'en') {
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = 'en';
+        
+        const translations = {
+            "تعيين رمز قفل الدردشة": "Set Chat Lock PIN",
+            "أدخل رمز الأمان (4 أرقام)": "Enter security PIN (4 digits)",
+            "حفظ وتفعيل القفل": "Save and Enable Lock",
+            "← رجوع إلى الإعدادات": "← Back to Settings"
+        };
+        
+        // استبدال النصوص تلقائياً بناءً على القاموس أعلاه
+        document.querySelectorAll('h1, h2, h3, h4, p, span, button, a, label').forEach(el => {
+            const text = el.textContent.trim();
+            if (translations[text]) {
+                el.textContent = translations[text];
+            }
+        });
+    }
+});
+</script>
+
+</body>
+</html>

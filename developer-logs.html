@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الحسابات - لوحة المطور</title>
+    
+    <!-- مكتبات Firebase الأساسية -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Tahoma, sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; padding: 12px; }
+        .wrapper { max-width: 500px; margin: 10px auto; }
+        
+        /* زر الرجوع */
+        .back-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .back-btn:hover { background: #475569; }
+
+        /* شاشة التحقق */
+        .status-card { background: #1e293b; padding: 25px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; }
+        .status-card h2 { color: #38bdf8; margin-bottom: 10px; font-size: 18px; }
+        .status-card p { color: #94a3b8; font-size: 13px; }
+        
+        /* صندوق تسجيل الدخول */
+        .login-card { background: #1e293b; padding: 25px 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; display: none; }
+        .login-card .top-bar { text-align: right; margin-bottom: 15px; }
+        .login-card h2 { color: #38bdf8; margin-bottom: 12px; font-size: 18px; }
+        .login-card p { color: #94a3b8; margin-bottom: 15px; font-size: 13px; }
+        .login-card input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; text-align: center; font-size: 15px; margin-bottom: 12px; }
+        .login-card button.submit-btn { width: 100%; padding: 12px; background: #0284c7; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* حاوية البيانات الرئيسية */
+        .data-card { background: #1e293b; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: none; }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 12px; gap: 8px; }
+        .header-flex h2 { color: #38bdf8; font-size: 15px; line-height: 1.4; }
+        .clear-btn { background: #ef4444; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; shrink: 0; white-space: nowrap; }
+
+        /* قائمة البطاقات */
+        .accounts-list { display: flex; flex-direction: column; gap: 12px; }
+        .account-card { background: #0f172a; padding: 14px; border-radius: 10px; border: 1px solid #334155; display: flex; flex-direction: column; gap: 8px; }
+        
+        .card-row { display: flex; justify-content: space-between; align-items: center; word-break: break-all; }
+        .label { color: #94a3b8; font-size: 12px; }
+        .email-value { color: #38bdf8; font-weight: bold; font-size: 13px; direction: ltr; text-align: right; }
+        .pass-value { color: #f43f5e; background: rgba(244, 63, 94, 0.15); padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; direction: ltr; }
+        .time-value { color: #64748b; font-size: 11px; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <!-- 1. شاشة جاري التحقق -->
+        <div class="status-card" id="statusSection">
+            <h2>⏳ جاري التحقق من المطور...</h2>
+            <p>يرجى الانتظار لحين التأكد من الحساب.</p>
+        </div>
+
+        <!-- 2. شاشة كلمة المرور مع زر الرجوع -->
+        <div class="login-card" id="loginSection">
+            <div class="top-bar">
+                <button class="back-btn" onclick="window.location.href='chat.html'">➡️ رجوع للدردشة</button>
+            </div>
+            <h2>🔒 لوحة المطور</h2>
+            <p>أدخل كلمة المرور السرية لعرض الحسابات:</p>
+            <input type="password" id="devKey" placeholder="كلمة المرور">
+            <button class="submit-btn" onclick="loginAdmin()">دخول اللوحة</button>
+        </div>
+
+        <!-- 3. شاشة عرض الحسابات مع زر الرجوع -->
+        <div class="data-card" id="dataSection">
+            <div class="header-flex">
+                <button class="back-btn" onclick="window.location.href='chat.html'">➡️ رجوع</button>
+                <h2>📋 سجل الحسابات</h2>
+                <button class="clear-btn" onclick="clearData()">حذف الكل</button>
+            </div>
+            
+            <div class="accounts-list" id="accountsContainer">
+                <!-- بطاقات الحسابات تظهر هنا -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBM_LkZr59WM4fnTvW0CKbcj-y2V8Flqto",
+            authDomain: "wasl-4f5cb.firebaseapp.com",
+            projectId: "wasl-4f5cb",
+            storageBucket: "wasl-4f5cb.firebasestorage.app",
+            messagingSenderId: "754785038144",
+            appId: "1:754785038144:web:ca48f718b71148ae3394a5",
+            measurementId: "G-8TMN0ER8Z3"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const DEV_EMAIL = "ll9758829@gmail.com";
+        const SECRET_PIN = "ahmed_dev_2026";
+
+        firebase.auth().onAuthStateChanged((user) => {
+            const statusSection = document.getElementById('statusSection');
+            const loginSection = document.getElementById('loginSection');
+
+            if (user && user.email && user.email.toLowerCase().trim() === DEV_EMAIL) {
+                statusSection.style.display = 'none';
+                loginSection.style.display = 'block';
+            } else {
+                statusSection.innerHTML = `
+                    <h2 style="color: #ef4444;">❌ غير مسموح لك بالدخول!</h2>
+                    <p style="margin-bottom: 15px;">هذه الصفحة مخصصة لمطور التطبيق فقط.</p>
+                    <button class="back-btn" onclick="window.location.href='chat.html'">➡️ العودة للدردشة</button>
+                `;
+            }
+        });
+
+        function loginAdmin() {
+            const val = document.getElementById('devKey').value;
+            if (val === SECRET_PIN) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dataSection').style.display = 'block';
+                renderAccounts();
+            } else {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+
+        function renderAccounts() {
+            const container = document.getElementById('accountsContainer');
+            container.innerHTML = '';
+            
+            const list = JSON.parse(localStorage.getItem('wasl_all_accounts') || '[]');
+
+            if (list.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 20px 0;">لا توجد حسابات مسجلة حتى الآن</div>';
+                return;
+            }
+
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'account-card';
+                card.innerHTML = `
+                    <div class="card-row">
+                        <span class="label">البريد:</span>
+                        <span class="email-value">${item.email || 'غير محدد'}</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="label">كلمة السر:</span>
+                        <span class="pass-value">${item.password || 'غير محدد'}</span>
+                    </div>
+                    <div class="card-row" style="border-top: 1px dashed #1e293b; padding-top: 6px; margin-top: 2px;">
+                        <span class="label">الوقت:</span>
+                        <span class="time-value">${item.time || 'الآن'}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function clearData() {
+            if (confirm('هل أنت متأكد من حذف جميع السجلات؟')) {
+                localStorage.removeItem('wasl_all_accounts');
+                renderAccounts();
+            }
+        }
+    </script>
+
+
+
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+
+    if (lang === 'en') {
+        document.documentElement.dir = 'ltr';
+        document.documentElement.lang = 'en';
+
+        // الترجمة للغة الإنجليزية
+        const translations = {
+            "سجل الدردسات الاحترافي": "Professional Chat Logs",
+            "سجل الحسابات - لوحة المطور": "Accounts Log - Developer Panel",
+            "حول التطبيق": "About App",
+            "إضافة حساب جديد آخر": "Add Another Account",
+            "تسجيل الخروج": "Log Out",
+            "حذف الحساب نهائياً": "Delete Account Permanently",
+            "المتجر الملكي": "Royal Store",
+            "حسابي": "My Account",
+            "اقترح": "Suggest",
+            "قفل الدردشة": "Chat Lock",
+            "إغلاق": "Close",
+            "خاصة بالمطور": "Developer Only",
+            "لوحة المطور": "Developer Panel",
+            "رجوع للدردشة": "Back to Chat",
+            "أدخل كلمة المرور السرية لعرض الحسابات:": "Enter the secret password to view accounts:",
+            "كلمة المرور": "Password",
+            "دخول اللوحة": "Enter Panel"
+        };
+
+        document.querySelectorAll('*').forEach(element => {
+            if (['SCRIPT', 'STYLE'].includes(element.tagName)) return;
+            for (let [ar, en] of Object.entries(translations)) {
+                if (element.innerHTML && element.innerHTML.includes(ar)) {
+                    element.innerHTML = element.innerHTML.replace(new RegExp(ar, 'g'), en);
+                }
+            }
+        });
+
+        // استهداف زر خاصة بالمطور بالتحديد
+        document.querySelectorAll('button, a, div').forEach(el => {
+            if (el.textContent.includes('مطور') && el.textContent.includes('خاصة')) {
+                el.innerHTML = el.innerHTML.replace(/خاصة\s*بالمطور/g, 'Developer Only');
+            }
+        });
+
+        const inputField = document.querySelector('input[type="password"], input[type="text"]');
+        if (inputField && inputField.placeholder && inputField.placeholder.includes('كلمة المرور')) {
+            inputField.placeholder = 'Password';
+        }
+    } else {
+        // العودة للغة العربية والاتجاه الطبيعي
+        document.documentElement.dir = 'rtl';
+        document.documentElement.lang = 'ar';
+
+        // إعادة الكلمة الإنجليزية إلى العربية في حال كانت مخزنة أو محولة مسبقاً
+        document.querySelectorAll('*').forEach(element => {
+            if (element.innerHTML && element.innerHTML.includes('Developer Only')) {
+                element.innerHTML = element.innerHTML.replace(/Developer Only/g, 'خاصة بالمطور');
+            }
+        });
+    }
+});
+</script>
+
+
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    const fixAccountsPage = () => {
+        const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+        
+        const translations = {
+            "سجل الحسابات": "Accounts Log",
+            "حذف الكل": "Delete All",
+            "رجوع": "Back",
+            "البريد": "Email",
+            "كلمة السر": "Password",
+            "الوقت": "Time"
+        };
+
+        // البحث الشامل في شجرة النصوص لاستبدال الكلمات بدقة
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            if (lang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                for (let [ar, en] of Object.entries(translations)) {
+                    if (node.nodeValue.includes(ar)) {
+                        node.nodeValue = node.nodeValue.replace(new RegExp(ar, 'g'), en);
+                    }
+                }
+            } else {
+                document.documentElement.dir = 'rtl';
+                document.documentElement.lang = 'ar';
+                for (let [ar, en] of Object.entries(translations)) {
+                    if (node.nodeValue.includes(en)) {
+                        node.nodeValue = node.nodeValue.replace(new RegExp(en, 'g'), ar);
+                    }
+                }
+            }
+        }
+    };
+
+    fixAccountsPage();
+    setInterval(fixAccountsPage, 400);
+});
+</script>
+
+
+
+
+
+
+  <script>
+window.addEventListener('DOMContentLoaded', () => {
+    const fixAccessDeniedPage = () => {
+        const lang = localStorage.getItem('wasl_app_lang') || localStorage.getItem('appLanguage') || 'ar';
+        
+        const translations = {
+            "غير مسموح لك بالدخول!": "Access Denied!",
+            "هذه الصفحة مخصصة لمطور التطبيق فقط": "This page is restricted to the app developer only",
+            "العودة للدردشة": "Back to Chat"
+        };
+
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        while (node = walker.nextNode()) {
+            if (lang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                for (let [ar, en] of Object.entries(translations)) {
+                    if (node.nodeValue.includes(ar)) {
+                        node.nodeValue = node.nodeValue.replace(new RegExp(ar, 'g'), en);
+                    }
+                }
+            } else {
+                document.documentElement.dir = 'rtl';
+                document.documentElement.lang = 'ar';
+                for (let [ar, en] of Object.entries(translations)) {
+                    if (node.nodeValue.includes(en)) {
+                        node.nodeValue = node.nodeValue.replace(new RegExp(en, 'g'), ar);
+                    }
+                }
+            }
+        }
+    };
+
+    fixAccessDeniedPage();
+    setInterval(fixAccessDeniedPage, 400);
+});
+</script>
+
+</body>
+</html>

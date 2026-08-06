@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة الدردشة العالمية - تسجيل الدخول</title>
+    
+    <!-- استدعاء ملف التنسيق الخاص بصفحة تسجيل الدخول -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- استدعاء خطوط جوجل لمظهر احترافي -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .google-mini-btn {
+            background-color: #1a73e8;
+            color: #ffffff;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 0px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: auto;
+        }
+        .google-mini-btn:hover {
+            background-color: #155cb4;
+        }
+        .google-container {
+            text-align: center;
+            margin-top: 5px;
+        }
+        #globalLangToggleBtn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        #globalLangToggleBtn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- زر تبديل اللغة في أعلى اليسار -->
+    <button id="globalLangToggleBtn" onclick="toggleAppLanguage()">🌐 EN / AR</button>
+
+    <div class="container">
+        <!-- 1. نموذج تسجيل الدخول -->
+        <div class="form-box" id="loginForm">
+            <h2 data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</h2>
+            <p class="subtitle" data-ar="مرحباً بك مجدداً في عالمك الخاص" data-en="Welcome back to your private world">مرحباً بك مجدداً في عالمك الخاص</p>
+            
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group">
+                    <input type="text" id="loginIdentifier" required placeholder=" ">
+                    <label data-ar="البريد الإلكتروني أو رقم الهاتف" data-en="Email or Phone Number">البريد الإلكتروني أو رقم الهاتف</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="loginPassword" required placeholder=" ">
+                    <label data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
+                </div>
+                
+                <button type="submit" class="btn" data-ar="دخول" data-en="Sign In">دخول</button>
+            </form>
+            
+            <div class="form-footer">
+                <a href="#" onclick="switchForm('forgotForm')" data-ar="نسيت كلمة المرور؟" data-en="Forgot password?">نسيت كلمة المرور؟</a>
+                <p>
+                    <span data-ar="ليس لديك حساب؟" data-en="Don't have an account?">ليس لديك حساب؟</span> 
+                    <a href="#" onclick="switchForm('registerForm')" data-ar="إنشاء حساب جديد" data-en="Create New Account">إنشاء حساب جديد</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- 2. نموذج إنشاء حساب جديد -->
+        <div class="form-box hidden" id="registerForm">
+            <h2 data-ar="إنشاء حساب جديد" data-en="Create New Account">إنشاء حساب جديد</h2>
+            <p class="subtitle" data-ar="انضم إلينا وابدأ المحادثة الآن" data-en="Join us and start chatting now">انضم إلينا وابدأ المحادثة الآن</p>
+            
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group">
+                    <input type="text" id="regاسم المستخدم" required minlength="3" pattern="[A-Za-z0-9]{3,}" placeholder=" ">
+                    <label data-ar="اسم المستخدم (3 أحرف إنجليزية على الأقل)" data-en="Username (At least 3 English chars)">اسم المستخدم (3 أحرف إنجليزية على الأقل)</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="regIdentifier" required placeholder=" ">
+                    <label data-ar="البريد الإلكتروني أو رقم الهاتف" data-en="Email or Phone Number">البريد الإلكتروني أو رقم الهاتف</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="regPassword" required placeholder=" ">
+                    <label data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="referralCodeInput" placeholder=" ">
+                    <label data-ar="كود الدعوة (اختياري)" data-en="Referral Code (Optional)">كود الدعوة (اختياري)</label>
+                </div>
+
+                <button type="submit" class="btn" data-ar="تأكيد التسجيل" data-en="Confirm Registration">تأكيد التسجيل</button>
+            </form>
+            
+            <div class="form-footer">
+                <p>
+                    <span data-ar="تمتلك حساباً بالفعل؟" data-en="Already have an account?">تمتلك حساباً بالفعل؟</span> 
+                    <a href="#" onclick="switchForm('loginForm')" data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</a>
+                </p>
+                
+                <div class="google-container">
+                    <button type="button" class="google-mini-btn" onclick="loginWithGoogle()" data-ar="تسجيل سريع بواسطة جوجل" data-en="Quick Sign in with Google">
+                        تسجيل سريع بواسطة جوجل
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. نموذج نسيت كلمة المرور -->
+        <div class="form-box hidden" id="forgotForm">
+            <h2 data-ar="استعادة الحساب" data-en="Recover Account">استعادة الحساب</h2>
+            <p class="subtitle" data-ar="أدخل بياناتك لإرسال رمز التحقق" data-en="Enter your details to send verification code">أدخل بياناتك لإرسال رمز التحقق</p>
+            
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group" id="identifierStep">
+                    <input type="text" id="forgotIdentifier" required placeholder=" ">
+                    <label data-ar="البريد الإلكتروني أو رقم الهاتف" data-en="Email or Phone Number">البريد الإلكتروني أو رقم الهاتف</label>
+                    <button type="button" class="btn secondary-btn" onclick="sendVerificationCode()" data-ar="إرسال رمز التحقق" data-en="Send Verification Code">إرسال رمز التحقق</button>
+                </div>
+                
+                <div class="input-group hidden" id="codeStep">
+                    <input type="text" id="verificationCode" placeholder=" ">
+                    <label data-ar="أدخل الرمز المرسل إليك" data-en="Enter the code sent to you">أدخل الرمز المرسل إليك</label>
+                    <button type="submit" class="btn" data-ar="تسجيل الدخول بالحساب" data-en="Sign in with account">تسجيل الدخول بالحساب</button>
+                </div>
+            </form>
+            
+            <div class="form-footer">
+                <a href="#" onclick="switchForm('loginForm')" data-ar="العودة لتسجيل الدخول" data-en="Back to Login">العودة لتسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- استدعاء مكتبات الفايربيس (إضافة مكتبة Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+        function showLocalizedAlert(arMsg, enMsg) {
+            const currentLang = localStorage.getItem('wasl_app_lang') || 'ar';
+            if (currentLang === 'en') {
+                alert(enMsg);
+            } else {
+                alert(arMsg);
+            }
+        }
+
+        function toggleAppLanguage() {
+            let currentLang = localStorage.getItem('wasl_app_lang') || 'ar';
+            let newLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('wasl_app_lang', newLang);
+            applyAuthPagesLanguage(newLang);
+        }
+
+        function applyAuthPagesLanguage(lang) {
+            const isEn = lang === 'en';
+            const btn = document.getElementById('globalLangToggleBtn');
+            if (btn) btn.textContent = isEn ? '🌐 العربية' : '🌐 English';
+
+            document.documentElement.setAttribute('dir', isEn ? 'ltr' : 'rtl');
+            document.documentElement.setAttribute('lang', lang);
+
+            document.querySelectorAll('[data-ar]').forEach(el => {
+                const translation = el.getAttribute(`data-${lang}`);
+                if (translation) {
+                    el.textContent = translation;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const activeLang = localStorage.getItem('wasl_app_lang') || 'ar';
+            applyAuthPagesLanguage(activeLang);
+        });
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBM_LkZr59WM4fnTvW0CKbcj-y2V8Flqto",
+            authDomain: "wasl-4f5cb.firebaseapp.com",
+            projectId: "wasl-4f5cb",
+            storageBucket: "wasl-4f5cb.firebasestorage.app",
+            messagingSenderId: "754785038144",
+            appId: "1:754785038144:web:ca48f718b71148ae3394a5",
+            measurementId: "G-8TMN0ER8Z3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const rdb = firebase.database(); // إضافة مرجع Realtime Database
+
+        // دالة مساعدة لحفظ بيانات المستخدم في Realtime Database و Firestore معاً
+        function saveUserData(user, username, email) {
+            const userData = {
+                username: username,
+                email: email,
+                badge: 'عادي',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // الحفظ في Firestore
+            const firestorePromise = db.collection("users").doc(user.uid).set(userData);
+
+            // الحفظ في Realtime Database لتلتقطه اللوحة مباشرة
+            const rdbPromise = rdb.ref('users/' + user.uid).set({
+                username: username,
+                email: email,
+                badge: 'عادي'
+            });
+
+            return Promise.all([firestorePromise, rdbPromise]);
+        }
+
+        auth.getRedirectResult()
+            .then((result) => {
+                if (result.user) {
+                    const user = result.user;
+                    const uname = user.displayName ? user.displayName.replace(/\s+/g, '') : "جوجل_مستخدم";
+                    return saveUserData(user, uname, user.email).then(() => {
+                        window.location.href = "chat.html";
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error("Error with Google redirect:", error);
+            });
+
+        function switchForm(formId) {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('forgotForm').classList.add('hidden');
+            
+            const targetForm = document.getElementById(formId);
+            if (targetForm) targetForm.classList.remove('hidden');
+        }
+
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithRedirect(provider);
+        }
+
+        document.querySelector('#registerForm form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('regاسم المستخدم').value.trim();
+            const identifier = document.getElementById('regIdentifier').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            const usernameRegex = /^[A-Za-z0-9]{3,}$/;
+            if (!usernameRegex.test(username)) {
+                showLocalizedAlert(
+                    "يجب أن يتكون اسم المستخدم من 3 أحرف إنجليزية أو أرقام على الأقل وبدون مسافات.",
+                    "Username must be at least 3 English characters or numbers without spaces."
+                );
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(identifier, password)
+                .then((userCredential) => {
+                    return saveUserData(userCredential.user, username, identifier);
+                })
+                .then(() => {
+                    showLocalizedAlert(
+                        "تم إنشاء الحساب بنجاح! سيتم توجيهك الآن.",
+                        "Account created successfully! You will be redirected now."
+                    );
+                    window.location.href = "chat.html";
+                })
+                .catch((error) => {
+                    showLocalizedAlert(
+                        "خطأ في إنشاء الحساب: " + error.message,
+                        "Error creating account: " + error.message
+                    );
+                });
+        });
+
+        document.querySelector('#loginForm form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            auth.signInWithEmailAndPassword(identifier, password)
+                .then((userCredential) => {
+                    // التأكد من تزامن بيانات الحساب في Realtime Database عند كل دخول
+                    const user = userCredential.user;
+                    rdb.ref('users/' + user.uid).update({
+                        email: user.email
+                    });
+
+                    showLocalizedAlert(
+                        "تم تسجيل الدخول بنجاح!",
+                        "Logged in successfully!"
+                    );
+                    window.location.href = "chat.html";
+                })
+                .catch((error) => {
+                    showLocalizedAlert(
+                        "خطأ: تأكد من البريد الإلكتروني وكلمة المرور.",
+                        "Error: Please check your email and password."
+                    );
+                });
+        });
+
+        function sendVerificationCode() {
+            const email = document.getElementById('forgotIdentifier').value.trim();
+            
+            if (!email) {
+                showLocalizedAlert(
+                    "الرجاء إدخل البريد الإلكتروني أولاً.",
+                    "Please enter your email first."
+                );
+                return;
+            }
+
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showLocalizedAlert(
+                        "تم إرسال رابط استعادة كلمة المرور لبريدك الإلكتروني!",
+                        "Password reset link has been sent to your email!"
+                    );
+                    const codeStep = document.getElementById('codeStep');
+                    if (codeStep) codeStep.classList.remove('hidden');
+                })
+                .catch((error) => {
+                    showLocalizedAlert(
+                        "خطأ: " + error.message,
+                        "Error: " + error.message
+                    );
+                });
+        }
+    </script>
+</body>
+</html>

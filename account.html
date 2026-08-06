@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حسابي - My Account</title>
+    
+    <!-- استدعاء مكتبات فايربيس (Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <style>
+        body {
+            background-color: #0d111a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .account-card {
+            background: #1a1f2c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .account-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .account-avatar {
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.08);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .account-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .info-group {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 14px;
+            border-radius: 14px;
+            margin-bottom: 15px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #8a9ba8;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .info-value-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .link-action-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .link-action-btn:hover {
+            background: #0056b3;
+        }
+
+        .back-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #c82333;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 999;
+        }
+
+        .modal-box {
+            background: #1a1f2c;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            width: 100%;
+            max-width: 340px;
+            padding: 20px;
+            border-radius: 16px;
+        }
+
+        .modal-box h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 12px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #111;
+            color: #fff;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="account-card">
+        <div class="account-header">
+            <div class="account-avatar">👤</div>
+            <h3 id="pageTitle">معلومات الحساب</h3>
+        </div>
+
+        <!-- خانة البريد الإلكتروني -->
+        <div class="info-group">
+            <span class="info-label" id="lblEmail">البريد الإلكتروني:</span>
+            <div class="info-value-row">
+                <span id="userEmailDisplay">جاري التحميل...</span>
+                <button id="emailLinkBtn" class="link-action-btn" style="display:none;" onclick="openLinkModal('email')">ربط بريد</button>
+            </div>
+        </div>
+
+        <!-- خانة رقم الهاتف -->
+        <div class="info-group">
+            <span class="info-label" id="lblPhone">رقم الهاتف:</span>
+            <div class="info-value-row">
+                <span id="userPhoneDisplay">جاري التحميل...</span>
+                <button id="phoneLinkBtn" class="link-action-btn" style="display:none;" onclick="openLinkModal('phone')">ربط رقم</button>
+            </div>
+        </div>
+
+        <!-- زر الرجوع -->
+        <button class="back-btn" id="backBtnText" onclick="history.back()">إغلاق / رجوع</button>
+    </div>
+
+    <!-- نافذة إدخال بيانات الربط -->
+    <div id="linkModal" class="modal-overlay">
+        <div class="modal-box">
+            <h4 id="modalHeading">ربط وسيلة اتصال</h4>
+            <p id="modalDesc">أدخل البيانات المطلوبة:</p>
+            <input type="text" id="modalInput" class="modal-input" placeholder="">
+            <div class="modal-actions">
+                <button style="background: #444; color: #fff;" onclick="closeLinkModal()">إلغاء</button>
+                <button style="background: #28a745; color: #fff;" onclick="saveLinkData()">تأكيد وربط</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // إعدادات Firebase الخاصة بمشروعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBM_LkZr59WM4fnTvW0CKbcj-y2V8Flqto",
+            authDomain: "wasl-4f5cb.firebaseapp.com",
+            projectId: "wasl-4f5cb",
+            storageBucket: "wasl-4f5cb.firebasestorage.app",
+            messagingSenderId: "754785038144",
+            appId: "1:754785038144:web:ca48f718b71148ae3394a5",
+            measurementId: "G-8TMN0ER8Z3"
+        };
+
+        // تهيئة فايربيس
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        let userData = {
+            email: "",
+            phone: ""
+        };
+
+        let currentType = '';
+
+        // الاستماع لحالة المصادقة وجلب البريد الإلكتروني ورقم الهاتف المسجل حالياً تلقائياً
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                userData.email = user.email || "";
+                userData.phone = user.phoneNumber || localStorage.getItem('user_phone') || "";
+            } else {
+                // فحص الذاكرة المحلية كبديل احتياطي
+                userData.email = localStorage.getItem('user_email') || "";
+                userData.phone = localStorage.getItem('user_phone') || "";
+            }
+            renderAccountPage();
+        });
+
+        function renderAccountPage() {
+            const lang = localStorage.getItem('wasl_app_lang') || 'ar';
+            
+            if (lang === 'en') {
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.documentElement.setAttribute('lang', 'en');
+                document.getElementById('pageTitle').innerText = 'Account Information';
+                document.getElementById('lblEmail').innerText = 'Email Address:';
+                document.getElementById('lblPhone').innerText = 'Phone Number:';
+                document.getElementById('emailLinkBtn').innerText = 'Link Email';
+                document.getElementById('phoneLinkBtn').innerText = 'Link Phone';
+                document.getElementById('backBtnText').innerText = 'Close / Back';
+            } else {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.setAttribute('lang', 'ar');
+                document.getElementById('pageTitle').innerText = 'معلومات الحساب';
+                document.getElementById('lblEmail').innerText = 'البريد الإلكتروني:';
+                document.getElementById('lblPhone').innerText = 'رقم الهاتف:';
+                document.getElementById('emailLinkBtn').innerText = 'ربط بريد';
+                document.getElementById('phoneLinkBtn').innerText = 'ربط رقم';
+                document.getElementById('backBtnText').innerText = 'إغلاق / رجوع';
+            }
+
+            const emailDisp = document.getElementById('userEmailDisplay');
+            const emailBtn = document.getElementById('emailLinkBtn');
+            if (userData.email && userData.email.trim() !== '') {
+                emailDisp.innerText = userData.email;
+                emailBtn.style.display = 'none';
+            } else {
+                emailDisp.innerText = lang === 'en' ? 'Not Linked' : 'غير مسجل';
+                emailBtn.style.display = 'inline-block';
+            }
+
+            const phoneDisp = document.getElementById('userPhoneDisplay');
+            const phoneBtn = document.getElementById('phoneLinkBtn');
+            if (userData.phone && userData.phone.trim() !== '') {
+                phoneDisp.innerText = userData.phone;
+                phoneBtn.style.display = 'none';
+            } else {
+                phoneDisp.innerText = lang === 'en' ? 'Not Linked' : 'غير مسجل';
+                phoneBtn.style.display = 'inline-block';
+            }
+        }
+
+        function openLinkModal(type) {
+            currentType = type;
+            const lang = localStorage.getItem('wasl_app_lang') || 'ar';
+            const modal = document.getElementById('linkModal');
+            const heading = document.getElementById('modalHeading');
+            const desc = document.getElementById('modalDesc');
+            const input = document.getElementById('modalInput');
+
+            input.value = '';
+            if (type === 'email') {
+                heading.innerText = lang === 'en' ? 'Link Email' : 'ربط البريد الإلكتروني';
+                desc.innerText = lang === 'en' ? 'Enter your email address:' : 'أدخل بريدك الإلكتروني:';
+                input.type = 'email';
+                input.placeholder = 'name@example.com';
+            } else {
+                heading.innerText = lang === 'en' ? 'Link Phone Number' : 'ربط رقم الهاتف';
+                desc.innerText = lang === 'en' ? 'Enter your phone number:' : 'أدخل رقم هاتفك:';
+                input.type = 'tel';
+                input.placeholder = '+964 770 000 0000';
+            }
+            modal.style.display = 'flex';
+        }
+
+        function closeLinkModal() {
+            document.getElementById('linkModal').style.display = 'none';
+        }
+
+        function saveLinkData() {
+            const val = document.getElementById('modalInput').value.trim();
+            const lang = localStorage.getItem('wasl_app_lang') || 'ar';
+            if (!val) {
+                alert(lang === 'en' ? 'Please enter valid data' : 'الرجاء إدخال بيانات صحيحة');
+                return;
+            }
+
+            if (currentType === 'email') {
+                userData.email = val;
+                localStorage.setItem('user_email', val);
+            } else {
+                userData.phone = val;
+                localStorage.setItem('user_phone', val);
+            }
+
+            closeLinkModal();
+            renderAccountPage();
+            alert(lang === 'en' ? 'Successfully Linked!' : 'تم الربط بنجاح!');
+        }
+    </script>
+</body>
+</html>
